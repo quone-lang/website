@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quone - a typed functional language for R</title>
+    <meta
+      name="description"
+      content="Quone is a statically typed functional language with Hindley-Milner inference and native dataframe verbs that compiles to readable R."
+    />
+    <meta name="theme-color" content="#276dc3" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Quone - a typed functional language for R" />
+    <meta
+      property="og:description"
+      content="Hindley-Milner inference, custom types, native dataframe verbs - compiled to readable R."
+    />
+    <meta property="og:url" content="https://quone-lang.org" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Bitcount+Grid+Double:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #fafaf9;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background-image:
+          radial-gradient(1000px circle at 10% -10%, rgba(39, 109, 195, 0.06), transparent 40%),
+          radial-gradient(900px circle at 110% 10%, rgba(224, 96, 76, 0.04), transparent 45%);
+        background-attachment: fixed;
+      }
+      #root, .elm-app {
+        min-height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/elm.js"></script>
+    <script>
+      var app = Elm.Main.init({
+        node: document.getElementById("root"),
+        flags: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+      });
+    </script>
+  </body>
+</html>
