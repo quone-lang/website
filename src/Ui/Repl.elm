@@ -84,7 +84,7 @@ view viewport config =
         , htmlAttribute (Html.Attributes.class "repl-window")
         , clip
         ]
-        [ titleBar
+        [ titleBar viewport
         , inputRow viewport
             { command = config.command
             , output = config.output
@@ -118,26 +118,38 @@ runGreenHover =
     rgb255 0x38 0x96 0x3C
 
 
-titleBar : Element msg
-titleBar =
-    row
-        [ width fill
-        , Background.color reSurfaceDark
-        , paddingXY Theme.space.md (Theme.space.sm + 2)
-        , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-        , Border.color palette.border
-        , spacing Theme.space.md
-        ]
-        [ trafficLights
-        , el
-            [ Font.family [ Theme.fontMono, Font.monospace ]
-            , Font.size type_.codeSmallSize
-            , Font.color palette.textMuted
-            , Element.centerX
+titleBar : Viewport.Viewport -> Element msg
+titleBar viewport =
+    if Viewport.isHandset viewport then
+        row
+            [ width fill
+            , Background.color reSurfaceDark
+            , paddingXY Theme.space.md (Theme.space.sm + 2)
+            , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
+            , Border.color palette.border
+            , spacing Theme.space.sm
             ]
-            (text "R 4.4.1 - Console")
-        , el [ width (px 56) ] Element.none
-        ]
+            [ trafficLights ]
+
+    else
+        row
+            [ width fill
+            , Background.color reSurfaceDark
+            , paddingXY Theme.space.md (Theme.space.sm + 2)
+            , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
+            , Border.color palette.border
+            , spacing Theme.space.md
+            ]
+            [ trafficLights
+            , el
+                [ Font.family [ Theme.fontMono, Font.monospace ]
+                , Font.size type_.codeSmallSize
+                , Font.color palette.textMuted
+                , Element.centerX
+                ]
+                (text "R 4.4.1 - Console")
+            , el [ width (px 56) ] Element.none
+            ]
 
 
 trafficLights : Element msg
@@ -175,29 +187,51 @@ inputRow viewport { command, output, onRun } =
 
         compact =
             Viewport.isHandset viewport
+
+        commandCell =
+            el
+                [ width fill
+                , htmlAttribute (Html.Attributes.style "min-width" "0")
+                , clip
+                , scrollbarX
+                ]
+                (commandLine viewport command)
+
+        promptRow =
+            row
+                [ width fill, spacing Theme.space.sm ]
+                [ promptGlyph, commandCell ]
+
+        button =
+            runButton
+                { isRunning = isRunning
+                , onRun = onRun
+                , compact = compact
+                }
     in
-    row
-        [ width fill
-        , paddingXY (replPadding viewport) (Theme.space.sm + 2)
-        , spacing Theme.space.sm
-        , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-        , Border.color palette.border
-        , Background.color palette.surface
-        ]
-        [ promptGlyph
-        , el
+    if compact then
+        column
             [ width fill
-            , htmlAttribute (Html.Attributes.style "min-width" "0")
-            , clip
-            , scrollbarX
+            , paddingXY (replPadding viewport) (Theme.space.sm + 2)
+            , spacing Theme.space.sm
+            , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
+            , Border.color palette.border
+            , Background.color palette.surface
             ]
-            (commandLine viewport command)
-        , runButton
-            { isRunning = isRunning
-            , onRun = onRun
-            , compact = compact
-            }
-        ]
+            [ promptRow
+            , el [ width fill ] button
+            ]
+
+    else
+        row
+            [ width fill
+            , paddingXY (replPadding viewport) (Theme.space.sm + 2)
+            , spacing Theme.space.sm
+            , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
+            , Border.color palette.border
+            , Background.color palette.surface
+            ]
+            [ promptGlyph, commandCell, button ]
 
 
 promptGlyph : Element msg
@@ -290,14 +324,7 @@ runButton { isRunning, onRun, compact } =
             Element.html
                 (Html.span
                     [ Html.Attributes.class "repl-run-label" ]
-                    (if compact then
-                        [ playGlyphHtml ]
-
-                     else
-                        [ playGlyphHtml
-                        , Html.text "Run"
-                        ]
-                    )
+                    [ playGlyphHtml, Html.text "Run" ]
                 )
 
         baseAttrs =
@@ -306,14 +333,13 @@ runButton { isRunning, onRun, compact } =
             , Font.size type_.smallSize
             , Font.medium
             , Border.rounded Theme.radius.sm
-            , paddingXY
+            , paddingXY Theme.space.md
                 (if compact then
-                    Theme.space.sm
+                    Theme.space.sm + 2
 
                  else
-                    Theme.space.md
+                    Theme.space.xs + 2
                 )
-                (Theme.space.xs + 2)
             , Element.mouseOver [ Background.color runGreenHover ]
             , htmlAttribute (Html.Attributes.class "repl-run")
             , htmlAttribute
@@ -328,16 +354,7 @@ runButton { isRunning, onRun, compact } =
             , htmlAttribute
                 (Html.Attributes.style "min-height"
                     (if compact then
-                        "32px"
-
-                     else
-                        "auto"
-                    )
-                )
-            , htmlAttribute
-                (Html.Attributes.style "min-width"
-                    (if compact then
-                        "44px"
+                        "40px"
 
                      else
                         "auto"
@@ -345,6 +362,14 @@ runButton { isRunning, onRun, compact } =
                 )
             , centerY
             ]
+                ++ (if compact then
+                        [ width fill
+                        , Font.center
+                        ]
+
+                    else
+                        []
+                   )
     in
     Input.button
         baseAttrs

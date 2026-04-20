@@ -258,8 +258,10 @@ heroCode viewport heroState =
         , spacing (replGap viewport)
         , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
         ]
-        [ snippetTabs viewport heroState
-        , CodeBlock.view viewport CodeBlock.Quone snippet.quone
+        [ column [ width fill, spacing (tabGap viewport) ]
+            [ snippetTabs viewport heroState
+            , CodeBlock.view viewport CodeBlock.Quone snippet.quone
+            ]
         , Repl.view viewport
             { command = "quone::compile(\"" ++ snippet.filename ++ "\")"
             , output = replOutput
@@ -330,6 +332,15 @@ replGap viewport =
 
     else
         Theme.space.lg
+
+
+tabGap : Viewport.Viewport -> Int
+tabGap viewport =
+    if Viewport.isHandset viewport then
+        Theme.space.sm + 2
+
+    else
+        Theme.space.md - 4
 
 
 
@@ -431,7 +442,8 @@ closingSection viewport =
         actionRow =
             if Viewport.isCompact viewport then
                 column
-                    [ paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
+                    [ centerX
+                    , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
                     , spacing Theme.space.md
                     ]
                     [ el [ centerX ] primaryAction
@@ -440,22 +452,54 @@ closingSection viewport =
 
             else
                 row
-                    [ paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
+                    [ centerX
+                    , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
                     , spacing Theme.space.md
                     ]
                     [ primaryAction
                     , secondaryAction
                     ]
-    in
-    Layout.section viewport
-        { kicker = Just "Status"
-        , title = Just "Early, useful, and still small enough to learn fast."
-        , body =
-            column
-                [ width (fill |> maximum 760)
-                , spacing Theme.space.lg
+
+        title =
+            paragraph
+                [ Font.size
+                    (if Viewport.isHandset viewport then
+                        28
+
+                     else
+                        type_.h2Size
+                    )
+                , Font.semiBold
+                , Font.color palette.textPrimary
+                , Font.family [ Theme.fontDisplay, Font.sansSerif ]
+                , Font.letterSpacing -0.6
+                , Font.center
+                , Region.heading 2
                 ]
-                (List.map prose Pitch.whyQuone ++ [ actionRow ])
+                [ text "Early, useful, and still small enough to learn fast." ]
+    in
+    Layout.wideSection viewport
+        { body =
+            column
+                [ width fill
+                , centerX
+                , spacing
+                    (if Viewport.isHandset viewport then
+                        Theme.space.lg
+
+                     else
+                        Theme.space.xl
+                    )
+                ]
+                [ kicker "Status"
+                , el [ centerX, width (fill |> maximum 760) ] title
+                , column
+                    [ width (fill |> maximum 760)
+                    , centerX
+                    , spacing Theme.space.lg
+                    ]
+                    (List.map prose Pitch.whyQuone ++ [ actionRow ])
+                ]
         }
 
 
@@ -464,6 +508,7 @@ prose s =
     paragraph
         [ Font.size type_.bodyLargeSize
         , Font.color palette.textSecondary
+        , Font.center
         , Element.spacing 6
         ]
         [ text s ]
