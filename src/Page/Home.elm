@@ -459,47 +459,17 @@ closingSection viewport =
                     [ primaryAction
                     , secondaryAction
                     ]
-
-        title =
-            paragraph
-                [ Font.size
-                    (if Viewport.isHandset viewport then
-                        28
-
-                     else
-                        type_.h2Size
-                    )
-                , Font.semiBold
-                , Font.color palette.textPrimary
-                , Font.family [ Theme.fontDisplay, Font.sansSerif ]
-                , Font.letterSpacing -0.6
-                , Font.center
-                , Region.heading 2
-                ]
-                [ text "Early, useful, and still small enough to learn fast." ]
     in
-    Layout.wideSection viewport
-        { body =
+    Layout.section viewport
+        { kicker = Just "Status"
+        , title = Just "Early, useful, and still small enough to learn fast."
+        , body =
             column
-                [ width fill
+                [ width (fill |> maximum 760)
                 , centerX
-                , spacing
-                    (if Viewport.isHandset viewport then
-                        Theme.space.lg
-
-                     else
-                        Theme.space.xl
-                    )
+                , spacing Theme.space.lg
                 ]
-                [ kicker "Status"
-                , el [ centerX, width (fill |> maximum 760) ] title
-                , column
-                    [ width (fill |> maximum 760)
-                    , centerX
-                    , spacing Theme.space.lg
-                    ]
-                    (List.map prose Pitch.whyQuone ++ [ actionRow ])
-                ]
+                (List.map prose Pitch.whyQuone ++ [ actionRow ])
         }
 
 

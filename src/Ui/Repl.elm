@@ -21,7 +21,6 @@ import Element
     exposing
         ( Element
         , centerY
-        , clip
         , column
         , el
         , fill
@@ -32,7 +31,6 @@ import Element
         , px
         , rgb255
         , row
-        , scrollbarX
         , spacing
         , text
         , width
@@ -82,7 +80,7 @@ view viewport config =
         , Border.width 1
         , Border.color palette.border
         , htmlAttribute (Html.Attributes.class "repl-window")
-        , clip
+        , htmlAttribute (Html.Attributes.style "overflow" "hidden")
         ]
         [ titleBar viewport
         , inputRow viewport
@@ -192,8 +190,8 @@ inputRow viewport { command, output, onRun } =
             el
                 [ width fill
                 , htmlAttribute (Html.Attributes.style "min-width" "0")
-                , clip
-                , scrollbarX
+                , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
+                , htmlAttribute (Html.Attributes.class "repl-command-cell")
                 ]
                 (commandLine viewport command)
 
@@ -412,8 +410,8 @@ outputArea viewport output =
                 )
             , Font.color palette.textPrimary
             , spacing 6
-            , clip
-            , scrollbarX
+            , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
+            , htmlAttribute (Html.Attributes.style "min-width" "0")
             ]
     in
     case output of

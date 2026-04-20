@@ -425,7 +425,7 @@ section viewport { title, kicker, body } =
             , spacing (sectionHeaderSpacing viewport)
             ]
             (List.filterMap identity
-                [ Maybe.map sectionKicker kicker
+                [ Maybe.map (\k -> el [ centerX ] (sectionKicker k)) kicker
                 , Maybe.map (sectionTitle viewport) title
                 , Just body
                 ]
@@ -461,6 +461,7 @@ sectionTitle viewport s =
         , Font.color palette.textPrimary
         , Font.family [ Theme.fontDisplay, Font.sansSerif ]
         , Font.letterSpacing -0.6
+        , Font.center
         , Region.heading 2
         ]
         [ text s ]
