@@ -1,7 +1,6 @@
 module Content.Pitch exposing
     ( Accent(..)
     , Feature
-    , tagline
     , taglinePrefix
     , subtagline
     , features
@@ -17,11 +16,6 @@ is that Quone gives R users static checks and a uniform syntax while
 producing code they could have written themselves.
 
 -}
-
-
-tagline : String
-tagline =
-    taglinePrefix ++ " R"
 
 
 {-| Stable portion of the hero headline; the trailing letter is rendered

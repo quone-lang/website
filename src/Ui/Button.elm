@@ -1,11 +1,9 @@
 module Ui.Button exposing
-    ( primary
-    , secondary
-    , linkPrimary
+    ( linkPrimary
     , linkSecondary
     )
 
-{-| Buttons and link-buttons in a small set of variants.
+{-| Link-buttons in primary and secondary variants.
 -}
 
 import Element
@@ -19,30 +17,7 @@ import Element
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input
 import Ui.Theme as Theme exposing (type_)
-
-
-
--- BUTTONS (msg-producing)
-
-
-primary : Theme.Mode -> { onPress : Maybe msg, label : String } -> Element msg
-primary themeMode { onPress, label } =
-    Input.button
-        (primaryStyle themeMode)
-        { onPress = onPress
-        , label = el [ Element.centerX ] (text label)
-        }
-
-
-secondary : Theme.Mode -> { onPress : Maybe msg, label : String } -> Element msg
-secondary themeMode { onPress, label } =
-    Input.button
-        (secondaryStyle themeMode)
-        { onPress = onPress
-        , label = el [ Element.centerX ] (text label)
-        }
 
 
 

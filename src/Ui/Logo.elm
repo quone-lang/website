@@ -1,4 +1,4 @@
-module Ui.Logo exposing (mark, full)
+module Ui.Logo exposing (full)
 
 {-| The Quone logo: a stylised "Q" set in Bitcount Grid Double (a
 distinctive grid/dot-matrix display face) followed by the lowercase

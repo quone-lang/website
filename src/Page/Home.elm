@@ -1,8 +1,6 @@
 module Page.Home exposing
-    ( HeroCompileState
-    , HeroEntry
-    , HeroState
-    , Msg(..)
+    ( HeroState
+    , Msg
     , initHeroState
     , updateHero
     , view
@@ -340,7 +338,7 @@ view themeMode viewport heroState =
 
 heroSection : Theme.Mode -> Viewport.Viewport -> HeroState -> Element Msg
 heroSection themeMode viewport heroState =
-    Layout.wideSection themeMode viewport
+    Layout.wideSection viewport
         { body =
             column
                 [ width fill
@@ -469,7 +467,7 @@ heroCode themeMode viewport heroState =
         , spacing 0
         , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
         ]
-        [ snippetTabs viewport heroState
+        [ snippetTabs heroState
         , el
             [ width fill
             , height shrink
@@ -506,8 +504,8 @@ activeSnippet heroState =
     snippetAt heroState.snippetIndex
 
 
-snippetTabs : Viewport.Viewport -> HeroState -> Element Msg
-snippetTabs _ heroState =
+snippetTabs : HeroState -> Element Msg
+snippetTabs heroState =
     let
         indexed =
             List.indexedMap Tuple.pair Examples.heroSnippets

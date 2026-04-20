@@ -1,7 +1,6 @@
 module Ui.CodeBlock exposing
     ( Language(..)
     , view
-    , viewSideBySide
     , viewBare
     , viewInline
     )
@@ -20,7 +19,6 @@ import Element
     exposing
         ( Element
         , alignRight
-        , alignTop
         , centerY
         , clip
         , column
@@ -36,7 +34,6 @@ import Element
         , spacing
         , text
         , width
-        , wrappedRow
         )
 import Element.Background as Background
 import Element.Border as Border
@@ -78,45 +75,6 @@ view themeMode viewport lang source =
         ]
         [ languageBadge themeMode lang source
         , block themeMode viewport lang source
-        ]
-
-
-{-| Two code blocks side by side: Quone on the left, R on the right.
-This is the canonical "before / after" presentation used in the hero
-and the longer code-example sections.
-
-`clip` on each side prevents long monospace lines from pushing past the
-50/50 split: instead the code block scrolls horizontally inside its
-container.
-
--}
-viewSideBySide : Theme.Mode -> Viewport.Viewport -> { quone : String, r : String } -> Element msg
-viewSideBySide themeMode viewport parts =
-    let
-        spacing_ =
-            if Viewport.isHandset viewport then
-                Theme.space.md
-
-            else
-                Theme.space.lg
-
-        pane lang source =
-            el
-                [ width fill
-                , alignTop
-                , clip
-                , htmlAttribute (Html.Attributes.style "min-width" "0")
-                , htmlAttribute (Html.Attributes.style "flex" "1 1 320px")
-                ]
-                (view themeMode viewport lang source)
-    in
-    wrappedRow
-        [ width fill
-        , spacing spacing_
-        , alignTop
-        ]
-        [ pane Quone parts.quone
-        , pane R parts.r
         ]
 
 
@@ -435,7 +393,7 @@ tokeniseHelp lang kw ty input acc =
             acc
 
         Just ( c, rest ) ->
-            if isCommentStart lang c rest then
+            if isCommentStart lang c then
                 Comment input :: acc
 
             else if c == '"' then
@@ -484,8 +442,8 @@ tokeniseHelp lang kw ty input acc =
 -- TOKENISER PRIMITIVES
 
 
-isCommentStart : Language -> Char -> String -> Bool
-isCommentStart lang c _ =
+isCommentStart : Language -> Char -> Bool
+isCommentStart lang c =
     case lang of
         Quone ->
             c == '#'

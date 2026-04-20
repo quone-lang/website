@@ -2,19 +2,10 @@ module Ui.Theme exposing
     ( Mode(..)
     , modeFromPrefersDark
     , isDark
-    , themeColor
-    , Palette
-    , palette
     , paletteFor
-    , Type
     , type_
-    , Space
     , space
-    , Radius
     , radius
-    , Shadow
-    , shadow
-    , shadowFor
     , maxContentWidth
     , fontSans
     , fontDisplay
@@ -37,7 +28,7 @@ of statistical computing without being kitsch.
 
 -}
 
-import Element exposing (Color, rgb255, rgba255)
+import Element exposing (Color, rgb255)
 import Element.Font as Font
 
 
@@ -67,16 +58,6 @@ isDark mode =
 
         Dark ->
             True
-
-
-themeColor : Mode -> String
-themeColor mode =
-    case mode of
-        Light ->
-            "#fafaf9"
-
-        Dark ->
-            "#0b1015"
 
 
 
@@ -296,40 +277,6 @@ radius =
     , lg = 12
     , pill = 999
     }
-
-
-
--- SHADOW (alpha overlays used as subtle borders / cards)
-
-
-type alias Shadow =
-    { soft : Color
-    , medium : Color
-    }
-
-
-shadow : Shadow
-shadow =
-    { soft = rgba255 0x1B 0x22 0x2C 0.06
-    , medium = rgba255 0x1B 0x22 0x2C 0.12
-    }
-
-
-darkShadow : Shadow
-darkShadow =
-    { soft = rgba255 0x00 0x00 0x00 0.28
-    , medium = rgba255 0x00 0x00 0x00 0.44
-    }
-
-
-shadowFor : Mode -> Shadow
-shadowFor mode =
-    case mode of
-        Light ->
-            shadow
-
-        Dark ->
-            darkShadow
 
 
 

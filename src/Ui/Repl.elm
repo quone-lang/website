@@ -453,7 +453,7 @@ livePrompt themeMode viewport { value, onInput, onSubmit, inputId } =
                 , htmlAttribute (Html.Attributes.class "repl-prompt repl-prompt-live")
                 ]
                 [ promptGlyph themeMode viewport
-                , consoleInput themeMode viewport
+                , consoleInput viewport
                     { value = value
                     , onInput = onInput
                     , onSubmit = onSubmit
@@ -525,8 +525,7 @@ name. We drop down to raw HTML here because elm-ui's `Input.text`
 doesn't expose enough hooks for the overlay layout.
 -}
 consoleInput :
-    Theme.Mode
-    -> Viewport.Viewport
+    Viewport.Viewport
     ->
         { value : String
         , onInput : String -> msg
@@ -534,7 +533,7 @@ consoleInput :
         , inputId : String
         }
     -> Element msg
-consoleInput _ viewport { value, onInput, onSubmit, inputId } =
+consoleInput viewport { value, onInput, onSubmit, inputId } =
     let
         sizeClass =
             if Viewport.isHandset viewport then

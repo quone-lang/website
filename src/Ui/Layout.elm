@@ -2,7 +2,6 @@ module Ui.Layout exposing
     ( page
     , section
     , wideSection
-    , footer
     )
 
 {-| Top-level page chrome: header, footer, and section containers.
@@ -567,8 +566,8 @@ section themeMode viewport { title, kicker, body } =
 
 {-| A wider section for hero-style content (still centred).
 -}
-wideSection : Theme.Mode -> Viewport.Viewport -> { body : Element msg } -> Element msg
-wideSection _ viewport { body } =
+wideSection : Viewport.Viewport -> { body : Element msg } -> Element msg
+wideSection viewport { body } =
     el
         [ width fill, paddingXY (horizontalPadding viewport) 0 ]
         (el
