@@ -22,6 +22,17 @@ module.exports = defineConfig({
         ...devices["Pixel 7"],
       },
     },
+    // The iOS bugs we keep regressing on (R-output collapse, hero
+    // pushing horizontal scroll) only reproduce against the WebKit
+    // engine -- mobile-chromium is Blink and won't catch them. This
+    // project runs the same suite against an iPhone-shaped WebKit so
+    // the regression class is locked down for real.
+    {
+      name: "mobile-webkit",
+      use: {
+        ...devices["iPhone 13"],
+      },
+    },
   ],
   webServer: {
     command: "npm run build && npm run serve:dist",

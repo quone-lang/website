@@ -293,6 +293,13 @@ consoleBody themeMode viewport config =
     in
     column
         [ width fill
+        -- Same iOS WebKit hygiene as in `view`: without these, the
+        -- console body collapses to its smallest possible height
+        -- (around 65px) on iPhone, leaving the REPL window looking
+        -- like just a title bar with no console.
+        , height shrink
+        , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+        , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
         , Background.color (reSurface themeMode)
         , paddingXY pad (Theme.space.md - 2)
         , spacing (Theme.space.sm - 2)
@@ -393,6 +400,18 @@ compiledOutput : Theme.Mode -> Viewport.Viewport -> String -> Element msg
 compiledOutput themeMode viewport rSource =
     el
         [ width fill
+        -- iOS WebKit collapses unconstrained flex children inside a
+        -- column to a single visible row unless we pin the basis and
+        -- forbid shrinking. Without these styles the generated R
+        -- shows up as one truncated line on iPhone. (Same family of
+        -- fixes used elsewhere in the REPL chrome.)
+        , height shrink
+        , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+        , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
+        , htmlAttribute (Html.Attributes.style "min-width" "0")
+        , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
+        , htmlAttribute
+            (Html.Attributes.style "-webkit-overflow-scrolling" "touch")
         , htmlAttribute (Html.Attributes.class "repl-output")
         , paddingEach { top = 4, right = 0, bottom = 0, left = 0 }
         ]

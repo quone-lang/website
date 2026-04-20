@@ -367,9 +367,33 @@
          "now". */
       .repl-history {
         opacity: 0.78;
+        min-width: 0;
       }
       .repl-history > * {
         user-select: text;
+        min-width: 0;
+      }
+
+      /* Compiled R output. iOS Safari needs the same flex/min-width
+         hygiene the rest of the REPL gets, otherwise long lines push
+         the parent flex item past the viewport (horizontal-scroll
+         regression on iPhone) AND the result block collapses to one
+         visible row. The Elm side mirrors these properties; both are
+         load-bearing. */
+      .repl-output {
+        min-width: 0;
+        flex-basis: auto;
+        flex-shrink: 0;
+      }
+
+      /* Scrollback container -- the column of past entries above the
+         live prompt. Same reason: iOS WebKit needs `min-width: 0` on
+         every flex child whose own content might overflow. */
+      .repl-scrollback {
+        min-width: 0;
+      }
+      .repl-scrollback > * {
+        min-width: 0;
       }
 
       /* Errors are coloured via elm-ui's `Font.color` so the inline
@@ -544,7 +568,14 @@
       }
 
       /* Snippet tab strip above the hero Quone source. Looks like a
-         row of editor file tabs; horizontally scrolls on mobile. */
+         row of editor file tabs; horizontally scrolls on mobile.
+         The width / max-width pair is load-bearing on iPhone:
+         without them the strip happily reports its CONTENT width to
+         its parent (~460px for five filenames at the mobile font
+         size), pushing the entire page wider than the viewport.
+         Pinning width: 100% means the strip fills its parent and
+         the overflow is resolved by the internal `overflow-x: auto`,
+         not by the body. */
       .snippet-tabs {
         display: flex;
         gap: 4px;
@@ -552,6 +583,9 @@
         scrollbar-width: none;
         -ms-overflow-style: none;
         padding: 0 2px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
       }
       .snippet-tabs::-webkit-scrollbar {
         display: none;
