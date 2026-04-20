@@ -31,6 +31,7 @@ import Element
         , px
         , rgb255
         , row
+        , shrink
         , spacing
         , text
         , width
@@ -80,6 +81,9 @@ view themeMode viewport config =
     in
     column
         [ width fill
+        , height shrink
+        , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+        , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
         , Background.color (reSurface themeMode)
         , Border.rounded Theme.radius.md
         , Border.width 1

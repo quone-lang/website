@@ -26,10 +26,10 @@ import Element
         , fill
         , height
         , htmlAttribute
-        , minimum
         , paddingXY
         , row
         , scrollbarX
+        , shrink
         , spacing
         , text
         , width
@@ -63,6 +63,9 @@ view themeMode viewport lang source =
     in
     column
         [ width fill
+        , height shrink
+        , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+        , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
         , Background.color colors.codeSurface
         , Border.rounded Theme.radius.md
         , Border.width 1
@@ -209,6 +212,8 @@ block themeMode viewport lang source =
         [ width fill
         , clip
         , scrollbarX
+        , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+        , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
         ]
         (column
             [ Font.family [ Theme.fontMono, Font.monospace ]
@@ -235,7 +240,9 @@ block themeMode viewport lang source =
                 )
             , spacing 4
             , width fill
-            , height (fill |> minimum 0)
+            , height shrink
+            , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+            , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
             ]
             renderedLines
         )

@@ -35,6 +35,7 @@ import Element
         , paddingEach
         , paragraph
         , row
+        , shrink
         , spacing
         , text
         , width
@@ -276,10 +277,16 @@ heroCode themeMode viewport heroState =
         [ snippetTabs viewport heroState
         , el
             [ width fill
+            , height shrink
+            , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+            , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
             , paddingEach { top = tabGap viewport, right = 0, bottom = 0, left = 0 }
             ]
             (column
                 [ width fill
+                , height shrink
+                , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+                , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
                 , spacing (replGap viewport)
                 , htmlAttribute (Html.Attributes.id selectedPanelId)
                 , htmlAttribute (Html.Attributes.attribute "role" "tabpanel")
