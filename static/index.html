@@ -40,15 +40,121 @@
     <meta name="twitter:image" content="https://quone-lang.org/social-card-share.png" />
     <meta name="twitter:image:alt" content="Quone - a typed functional language for R" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts.
+
+         All four fonts are self-hosted under /fonts/ and fingerprinted by
+         build.sh, so they share the long-cache `immutable` policy in
+         netlify.toml and avoid the cross-origin DNS+TLS hops we used to
+         pay for fonts.googleapis.com.
+
+         The three text fonts (Inter, Space Grotesk, JetBrains Mono) are
+         declared with `font-display: optional` so the browser uses the
+         metric-matched fallback if the woff2 hasn't arrived within ~100ms;
+         on the next visit it loads from cache instantly. Combined with the
+         <link rel="preload"> below this means no FOUT on first paint and no
+         flash-and-swap on subsequent paints.
+
+         The logo font (Bitcount Grid Double) is decorative and only used
+         for the small Q glyph, so it stays on `swap` -- worth waiting for
+         even if it arrives late, since there is no good fallback for a
+         dot-matrix display face.
+
+         The `local()` entries on each fallback declaration just point at
+         a system font; the override descriptors reshape that fallback so
+         its line-box matches the web font, eliminating reflow on swap. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Bitcount+Grid+Double:wght@400&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/__FONT_INTER__"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/__FONT_SPACEGROTESK__"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/__FONT_JETBRAINSMONO__"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
 
     <style>
+      @font-face {
+        font-family: "Inter";
+        font-style: normal;
+        font-weight: 400 700;
+        font-display: optional;
+        src: url("/fonts/__FONT_INTER__") format("woff2");
+      }
+      @font-face {
+        font-family: "Inter Fallback";
+        size-adjust: 107.4%;
+        ascent-override: 90%;
+        descent-override: 22.43%;
+        line-gap-override: 0%;
+        src: local("Arial");
+      }
+
+      @font-face {
+        font-family: "Space Grotesk";
+        font-style: normal;
+        font-weight: 500 700;
+        font-display: optional;
+        src: url("/fonts/__FONT_SPACEGROTESK__") format("woff2");
+      }
+      @font-face {
+        font-family: "Space Grotesk Fallback";
+        size-adjust: 105.5%;
+        ascent-override: 92.91%;
+        descent-override: 19.18%;
+        line-gap-override: 9.59%;
+        src: local("Arial");
+      }
+
+      @font-face {
+        font-family: "JetBrains Mono";
+        font-style: normal;
+        font-weight: 400 600;
+        font-display: optional;
+        src: url("/fonts/__FONT_JETBRAINSMONO__") format("woff2");
+      }
+      @font-face {
+        font-family: "JetBrains Mono Fallback";
+        size-adjust: 92%;
+        ascent-override: 99%;
+        descent-override: 24%;
+        line-gap-override: 0%;
+        src: local("Menlo"), local("Consolas"), local("Courier New");
+      }
+
+      @font-face {
+        font-family: "Bitcount Grid Double";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("/fonts/__FONT_BITCOUNTGRIDDOUBLE__") format("woff");
+      }
+
+      /* Globally extend Elm's typeface stacks with the matched fallbacks
+         so that on the rare first-paint where `font-display: optional`
+         falls back to system fonts, the line-boxes still match the web
+         font's metrics and nothing reflows once it loads. */
+      body,
+      input,
+      button,
+      textarea,
+      select {
+        font-family:
+          "Inter", "Inter Fallback", system-ui, -apple-system,
+          "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+
       :root {
         color-scheme: light;
         --page-bg: #fafaf9;
@@ -203,7 +309,7 @@
         opacity: 0;
         color: var(--hero-swap-accent);
         pointer-events: none;
-        font-family: "Bitcount Grid Double", "JetBrains Mono", monospace;
+        font-family: "Bitcount Grid Double", "JetBrains Mono", "JetBrains Mono Fallback", monospace;
         font-weight: 400;
         font-size: 1.2em;
         line-height: 1;
@@ -306,8 +412,8 @@
         border: 0;
         border-bottom: 2px solid transparent;
         padding: 8px 14px;
-        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular,
-          Menlo, Consolas, monospace;
+        font-family: "JetBrains Mono", "JetBrains Mono Fallback",
+          ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 13px;
         color: var(--tab-text);
         cursor: pointer;

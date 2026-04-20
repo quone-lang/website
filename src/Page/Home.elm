@@ -511,7 +511,7 @@ featureBadge { background, color, glyph } =
         , height (Element.px 40)
         , Border.rounded Theme.radius.md
         , Background.color background
-        , Font.family [ Theme.fontMono, Font.monospace ]
+        , Font.family Theme.fontMono
         , Font.size 20
         , Font.semiBold
         , Font.color color

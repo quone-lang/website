@@ -76,7 +76,7 @@ page { themeMode, isFollowingSystem, viewport, currentPath, isMenuOpen, onToggle
         , height fill
         , Background.color colors.background
         , Font.color colors.textPrimary
-        , Font.family [ Theme.fontSans, Font.sansSerif ]
+        , Font.family Theme.fontSans
         , Font.size type_.bodySize
         ]
         [ header
@@ -595,7 +595,7 @@ sectionTitle themeMode viewport s =
             )
         , Font.semiBold
         , Font.color colors.textPrimary
-        , Font.family [ Theme.fontDisplay, Font.sansSerif ]
+        , Font.family Theme.fontDisplay
         , Font.letterSpacing -0.6
         , Font.center
         , Region.heading 2

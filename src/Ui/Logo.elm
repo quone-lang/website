@@ -33,7 +33,7 @@ mark themeMode size =
             Theme.paletteFor themeMode
     in
     el
-        [ Font.family [ Theme.fontLogo, Theme.fontMono, Font.monospace ]
+        [ Font.family Theme.fontLogo
         , Font.color colors.primary
         , Font.size size
         , Font.regular
@@ -57,7 +57,7 @@ full themeMode { wordmarkSize, markSize } =
         ]
         [ el [ centerY, moveDown 3 ] (mark themeMode markSize)
         , el
-            [ Font.family [ Theme.fontDisplay, Font.sansSerif ]
+            [ Font.family Theme.fontDisplay
             , Font.color colors.textPrimary
             , Font.size wordmarkSize
             , Font.semiBold

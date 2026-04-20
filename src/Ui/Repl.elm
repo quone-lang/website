@@ -158,7 +158,7 @@ titleBar themeMode viewport =
             ]
             [ trafficLights
             , el
-                [ Font.family [ Theme.fontMono, Font.monospace ]
+                [ Font.family Theme.fontMono
                 , Font.size type_.smallSize
                 , Font.color colors.textMuted
                 ]
@@ -176,7 +176,7 @@ titleBar themeMode viewport =
             ]
             [ trafficLights
             , el
-                [ Font.family [ Theme.fontMono, Font.monospace ]
+                [ Font.family Theme.fontMono
                 , Font.size type_.codeSmallSize
                 , Font.color colors.textMuted
                 , Element.centerX
@@ -282,7 +282,7 @@ promptGlyph themeMode =
             Theme.paletteFor themeMode
     in
     el
-        [ Font.family [ Theme.fontMono, Font.monospace ]
+        [ Font.family Theme.fontMono
         , Font.size type_.codeSize
         , Font.color colors.primary
         , Font.semiBold
@@ -298,7 +298,7 @@ commandLine themeMode viewport command =
             Theme.paletteFor themeMode
     in
     el
-        [ Font.family [ Theme.fontMono, Font.monospace ]
+        [ Font.family Theme.fontMono
         , Font.size
             (if Viewport.isHandset viewport then
                 type_.codeSmallSize
@@ -470,7 +470,7 @@ outputArea themeMode viewport output =
             , height shrink
             , paddingXY pad (Theme.space.md - 2)
             , Background.color (reSurface themeMode)
-            , Font.family [ Theme.fontMono, Font.monospace ]
+            , Font.family Theme.fontMono
             , Font.size
                 (if Viewport.isHandset viewport then
                     type_.codeSmallSize

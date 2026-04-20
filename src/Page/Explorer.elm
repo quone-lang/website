@@ -413,7 +413,7 @@ pane { kind, filename, chunks, highlighted, isR } =
             , spacing Theme.space.sm
             ]
             [ el
-                [ Font.family [ Theme.fontMono, Font.monospace ]
+                [ Font.family Theme.fontMono
                 , Font.size type_.codeSmallSize
                 , Font.color (paneHeaderColor kind)
                 ]
@@ -440,7 +440,7 @@ pane { kind, filename, chunks, highlighted, isR } =
                 [ width fill
                 , paddingXY Theme.space.md Theme.space.md
                 , spacing 2
-                , Font.family [ Theme.fontMono, Font.monospace ]
+                , Font.family Theme.fontMono
                 , Font.size type_.codeSize
                 , Font.color fg
                 ]
@@ -684,7 +684,7 @@ renderExplain s =
         render idx str =
             if modBy 2 idx == 1 then
                 el
-                    [ Font.family [ Theme.fontMono, Font.monospace ]
+                    [ Font.family Theme.fontMono
                     , Font.size type_.codeSmallSize
                     , Font.color palette.codeKeyword
                     , Background.color palette.codeSurface

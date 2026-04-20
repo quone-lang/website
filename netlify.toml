@@ -20,3 +20,14 @@
   for = "/elm-*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Long cache on the self-hosted fonts. build.sh fingerprints each file
+# as <name>-<hash>.<ext>, so this is safe across deploys and keeps the
+# fonts hot in the cache for repeat visitors (which is what makes the
+# `font-display: optional` strategy in index.html flash-free after the
+# first visit).
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"

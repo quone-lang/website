@@ -64,7 +64,7 @@ quote =
         , spacing Theme.space.sm
         ]
         [ el
-            [ Font.family [ Theme.fontDisplay, Font.serif ]
+            [ Font.family Theme.fontDisplay
             , Font.size 22
             , Font.color palette.textPrimary
             , Font.italic

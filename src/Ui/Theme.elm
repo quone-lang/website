@@ -208,24 +208,46 @@ type_ =
     }
 
 
-fontSans : Font.Font
+{-| Each font helper returns the full stack including a metric-matched
+fallback typeface (declared in static/index.html). With
+`font-display: optional` on the web fonts, the browser may fall back to
+the system font on the very first uncached visit; the fallback's
+size-adjust/ascent overrides keep the line-box identical to the web
+font's, so when the cached font appears on the next visit nothing
+reflows. See the <style> block in static/index.html for the @font-face
+declarations.
+-}
+fontSans : List Font.Font
 fontSans =
-    Font.typeface "Inter"
+    [ Font.typeface "Inter"
+    , Font.typeface "Inter Fallback"
+    , Font.sansSerif
+    ]
 
 
-fontDisplay : Font.Font
+fontDisplay : List Font.Font
 fontDisplay =
-    Font.typeface "Space Grotesk"
+    [ Font.typeface "Space Grotesk"
+    , Font.typeface "Space Grotesk Fallback"
+    , Font.sansSerif
+    ]
 
 
-fontMono : Font.Font
+fontMono : List Font.Font
 fontMono =
-    Font.typeface "JetBrains Mono"
+    [ Font.typeface "JetBrains Mono"
+    , Font.typeface "JetBrains Mono Fallback"
+    , Font.monospace
+    ]
 
 
-fontLogo : Font.Font
+fontLogo : List Font.Font
 fontLogo =
-    Font.typeface "Bitcount Grid Double"
+    [ Font.typeface "Bitcount Grid Double"
+    , Font.typeface "JetBrains Mono"
+    , Font.typeface "JetBrains Mono Fallback"
+    , Font.monospace
+    ]
 
 
 

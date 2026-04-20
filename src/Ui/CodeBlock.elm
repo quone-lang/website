@@ -137,7 +137,7 @@ viewBare themeMode viewport lang source =
                 |> List.map (renderLine themeMode lang)
     in
     column
-        [ Font.family [ Theme.fontMono, Font.monospace ]
+        [ Font.family Theme.fontMono
         , Font.size
             (if Viewport.isHandset viewport then
                 type_.codeSmallSize
@@ -161,7 +161,7 @@ viewInline themeMode s =
             Theme.paletteFor themeMode
     in
     el
-        [ Font.family [ Theme.fontMono, Font.monospace ]
+        [ Font.family Theme.fontMono
         , Font.size type_.codeSmallSize
         , Background.color colors.codeSurface
         , paddingXY 6 2
@@ -185,7 +185,7 @@ languageBadge themeMode lang source =
             languageLabel lang
     in
     row
-        [ Font.family [ Theme.fontMono, Font.monospace ]
+        [ Font.family Theme.fontMono
         , Font.size type_.codeSmallSize
         , paddingXY Theme.space.md Theme.space.sm
         , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
@@ -245,7 +245,7 @@ blockHtml themeMode viewport lang source =
                 ++ String.fromInt (codePaddingX viewport)
                 ++ "px"
             )
-        , Html.Attributes.style "font-family" "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        , Html.Attributes.style "font-family" "\"JetBrains Mono\", \"JetBrains Mono Fallback\", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
         , Html.Attributes.style "font-size" (String.fromInt (codeFontSize viewport) ++ "px")
         , Html.Attributes.style "line-height" "1.55"
         , Html.Attributes.style "color" (plainColor themeMode)

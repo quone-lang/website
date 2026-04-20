@@ -8,10 +8,12 @@ const port = Number(process.env.PORT || 4173);
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
   ".xml": "application/xml; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
 };
 
 function safePathname(rawPathname) {

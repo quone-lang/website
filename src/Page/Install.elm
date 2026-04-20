@@ -72,7 +72,7 @@ pageTitle themeMode viewport =
             )
         , Font.semiBold
         , Font.color colors.textPrimary
-        , Font.family [ Theme.fontDisplay, Font.sansSerif ]
+        , Font.family Theme.fontDisplay
         , Font.letterSpacing -0.6
         , Region.heading 1
         ]
@@ -397,7 +397,7 @@ codeShell themeMode viewport source =
                      else
                         Theme.space.lg
                     )
-                , Font.family [ Theme.fontMono, Font.monospace ]
+                , Font.family Theme.fontMono
                 , Font.size
                     (if Viewport.isHandset viewport then
                         type_.codeSmallSize

@@ -264,7 +264,7 @@ view model =
             [ width fill
             , height fill
             , Background.color colors.background
-            , Font.family [ Theme.fontSans, Font.sansSerif ]
+            , Font.family Theme.fontSans
             , Font.size type_.bodySize
             , Font.color colors.textPrimary
             ]
