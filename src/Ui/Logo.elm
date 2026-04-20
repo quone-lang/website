@@ -21,16 +21,20 @@ import Element
         , text
         )
 import Element.Font as Font
-import Ui.Theme as Theme exposing (palette)
+import Ui.Theme as Theme
 
 
 {-| Just the "Q" mark, used for favicon-style placements.
 -}
-mark : Int -> Element msg
-mark size =
+mark : Theme.Mode -> Int -> Element msg
+mark themeMode size =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
         [ Font.family [ Theme.fontLogo, Theme.fontMono, Font.monospace ]
-        , Font.color palette.primary
+        , Font.color colors.primary
         , Font.size size
         , Font.regular
         , centerY
@@ -41,16 +45,20 @@ mark size =
 {-| The full lock-up: "Q" mark plus the "quone" wordmark, sized for
 the header (and a smaller variant for the footer).
 -}
-full : { wordmarkSize : Int, markSize : Int } -> Element msg
-full { wordmarkSize, markSize } =
+full : Theme.Mode -> { wordmarkSize : Int, markSize : Int } -> Element msg
+full themeMode { wordmarkSize, markSize } =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     row
         [ spacing 6
         , centerY
         ]
-        [ el [ centerY, moveDown 3 ] (mark markSize)
+        [ el [ centerY, moveDown 3 ] (mark themeMode markSize)
         , el
             [ Font.family [ Theme.fontDisplay, Font.sansSerif ]
-            , Font.color palette.textPrimary
+            , Font.color colors.textPrimary
             , Font.size wordmarkSize
             , Font.semiBold
             , Font.letterSpacing -0.4

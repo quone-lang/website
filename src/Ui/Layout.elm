@@ -40,7 +40,7 @@ import Element.Region as Region
 import Html.Attributes
 import Ui.Eyebrow as Eyebrow
 import Ui.Logo as Logo
-import Ui.Theme as Theme exposing (palette, type_)
+import Ui.Theme as Theme exposing (type_)
 import Ui.Viewport as Viewport
 
 
@@ -56,27 +56,37 @@ horizontal row.
 
 -}
 page :
-    { viewport : Viewport.Viewport
+    { themeMode : Theme.Mode
+    , isFollowingSystem : Bool
+    , viewport : Viewport.Viewport
     , currentPath : String
     , isMenuOpen : Bool
     , onToggleMenu : msg
+    , onToggleTheme : msg
     , content : Element msg
     }
     -> Element msg
-page { viewport, currentPath, isMenuOpen, onToggleMenu, content } =
+page { themeMode, isFollowingSystem, viewport, currentPath, isMenuOpen, onToggleMenu, onToggleTheme, content } =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     column
         [ width fill
         , height fill
-        , Background.color palette.background
-        , Font.color palette.textPrimary
+        , Background.color colors.background
+        , Font.color colors.textPrimary
         , Font.family [ Theme.fontSans, Font.sansSerif ]
         , Font.size type_.bodySize
         ]
         [ header
-            { viewport = viewport
+            { themeMode = themeMode
+            , isFollowingSystem = isFollowingSystem
+            , viewport = viewport
             , currentPath = currentPath
             , isMenuOpen = isMenuOpen
             , onToggleMenu = onToggleMenu
+            , onToggleTheme = onToggleTheme
             }
         , column
             [ width fill
@@ -84,7 +94,7 @@ page { viewport, currentPath, isMenuOpen, onToggleMenu, content } =
             , paddingXY 0 (pageSpacing viewport)
             ]
             [ content ]
-        , footer viewport
+        , footer themeMode viewport
         ]
 
 
@@ -93,14 +103,20 @@ page { viewport, currentPath, isMenuOpen, onToggleMenu, content } =
 
 
 header :
-    { viewport : Viewport.Viewport
+    { themeMode : Theme.Mode
+    , isFollowingSystem : Bool
+    , viewport : Viewport.Viewport
     , currentPath : String
     , isMenuOpen : Bool
     , onToggleMenu : msg
+    , onToggleTheme : msg
     }
     -> Element msg
-header { viewport, currentPath, isMenuOpen, onToggleMenu } =
+header { themeMode, isFollowingSystem, viewport, currentPath, isMenuOpen, onToggleMenu, onToggleTheme } =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         navItems =
             [ ( "/", "Home", Internal )
             , ( "/install", "Install", Internal )
@@ -113,9 +129,9 @@ header { viewport, currentPath, isMenuOpen, onToggleMenu } =
     in
     el
         [ width fill
-        , Background.color palette.surface
+        , Background.color colors.surface
         , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-        , Border.color palette.border
+        , Border.color colors.border
         ]
         (if Viewport.isCompact viewport then
             column
@@ -127,24 +143,33 @@ header { viewport, currentPath, isMenuOpen, onToggleMenu } =
                 [ row [ width fill, centerY, spacing Theme.space.md ]
                     [ link [ alignLeft ]
                         { url = "/"
-                        , label = Logo.full { wordmarkSize = 22, markSize = 34 }
+                        , label = Logo.full themeMode { wordmarkSize = 22, markSize = 34 }
                         }
-                    , el [ alignRight ]
-                        (menuButton
-                            { isOpen = isMenuOpen
+                    , row [ alignRight, spacing Theme.space.sm, centerY ]
+                        [ themeToggleButton
+                            { themeMode = themeMode
+                            , isFollowingSystem = isFollowingSystem
+                            , onPress = onToggleTheme
+                            }
+                        , menuButton
+                            { themeMode = themeMode
+                            , isOpen = isMenuOpen
                             , onPress = onToggleMenu
                             }
-                        )
+                        ]
                     ]
                 , if isMenuOpen then
                     column
                         [ width fill
                         , spacing Theme.space.sm
                         , paddingXY 0 Theme.space.sm
+                        , htmlAttribute (Html.Attributes.id "site-nav-panel")
+                        , htmlAttribute (Html.Attributes.attribute "role" "navigation")
+                        , htmlAttribute (Html.Attributes.attribute "aria-label" "Primary navigation")
                         , Border.widthEach { top = 1, right = 0, bottom = 0, left = 0 }
-                        , Border.color palette.border
+                        , Border.color colors.border
                         ]
-                        (List.map (mobileNavItem currentPath) navItems)
+                        (List.map (mobileNavItem themeMode currentPath) navItems)
 
                   else
                     none
@@ -159,11 +184,19 @@ header { viewport, currentPath, isMenuOpen, onToggleMenu } =
                 ]
                 [ link [ alignLeft ]
                     { url = "/"
-                    , label = Logo.full { wordmarkSize = 22, markSize = 38 }
+                    , label = Logo.full themeMode { wordmarkSize = 22, markSize = 38 }
                     }
                 , row
-                    [ alignRight, spacing Theme.space.lg, centerY ]
-                    (List.map (desktopNavItem currentPath) navItems)
+                    [ alignRight, spacing Theme.space.md, centerY ]
+                    [ row
+                        [ spacing Theme.space.lg, centerY ]
+                        (List.map (desktopNavItem themeMode currentPath) navItems)
+                    , themeToggleButton
+                        { themeMode = themeMode
+                        , isFollowingSystem = isFollowingSystem
+                        , onPress = onToggleTheme
+                        }
+                    ]
                 ]
         )
 
@@ -173,19 +206,22 @@ type LinkKind
     | External
 
 
-desktopNavItem : String -> ( String, String, LinkKind ) -> Element msg
-desktopNavItem currentPath ( url, label, kind ) =
+desktopNavItem : Theme.Mode -> String -> ( String, String, LinkKind ) -> Element msg
+desktopNavItem themeMode currentPath ( url, label, kind ) =
     case kind of
         Internal ->
-            navLink currentPath url label
+            navLink themeMode currentPath url label
 
         External ->
-            externalLink url label
+            externalLink themeMode url label
 
 
-mobileNavItem : String -> ( String, String, LinkKind ) -> Element msg
-mobileNavItem currentPath ( url, label, kind ) =
+mobileNavItem : Theme.Mode -> String -> ( String, String, LinkKind ) -> Element msg
+mobileNavItem themeMode currentPath ( url, label, kind ) =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         attrs =
             [ width fill
             , paddingXY Theme.space.sm Theme.space.sm
@@ -200,30 +236,107 @@ mobileNavItem currentPath ( url, label, kind ) =
                 isActive =
                     currentPath == url
             in
-            link (attrs ++ [ Font.color (if isActive then palette.primary else palette.textSecondary) ])
+            link (attrs ++ [ Font.color (if isActive then colors.primary else colors.textSecondary) ])
                 { url = url, label = text label }
 
         External ->
-            newTabLink (attrs ++ [ Font.color palette.textSecondary ])
+            newTabLink (attrs ++ [ Font.color colors.textSecondary ])
                 { url = url, label = text label }
 
 
-menuButton : { isOpen : Bool, onPress : msg } -> Element msg
-menuButton { isOpen, onPress } =
+themeToggleButton :
+    { themeMode : Theme.Mode
+    , isFollowingSystem : Bool
+    , onPress : msg
+    }
+    -> Element msg
+themeToggleButton { themeMode, isFollowingSystem, onPress } =
+    let
+        colors =
+            Theme.paletteFor themeMode
+
+        ( glyph, nextLabel ) =
+            case themeMode of
+                Theme.Light ->
+                    ( "\u{263D}", "Switch to dark theme" )
+
+                Theme.Dark ->
+                    ( "\u{2600}", "Switch to light theme" )
+
+        hint =
+            if isFollowingSystem then
+                nextLabel ++ " (currently following system)"
+
+            else
+                nextLabel
+    in
+    Input.button
+        [ paddingXY Theme.space.xs Theme.space.xs
+        , Border.rounded Theme.radius.pill
+        , Border.width 1
+        , Border.color
+            (if isFollowingSystem then
+                colors.border
+
+             else
+                colors.primary
+            )
+        , Background.color colors.surface
+        , Font.color
+            (if isFollowingSystem then
+                colors.textMuted
+
+             else
+                colors.primary
+            )
+        , Element.mouseOver
+            [ Background.color colors.codeSurface
+            , Font.color colors.textPrimary
+            ]
+        , htmlAttribute (Html.Attributes.attribute "aria-label" hint)
+        , htmlAttribute (Html.Attributes.title hint)
+        ]
+        { onPress = Just onPress
+        , label =
+            el
+                [ Font.size 16
+                , Font.semiBold
+                , htmlAttribute (Html.Attributes.attribute "aria-hidden" "true")
+                ]
+                (text glyph)
+        }
+
+
+menuButton : { themeMode : Theme.Mode, isOpen : Bool, onPress : msg } -> Element msg
+menuButton { themeMode, isOpen, onPress } =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     Input.button
         [ paddingXY Theme.space.sm Theme.space.xs
+        , htmlAttribute
+            (Html.Attributes.attribute "aria-expanded"
+                (if isOpen then
+                    "true"
+
+                 else
+                    "false"
+                )
+            )
+        , htmlAttribute (Html.Attributes.attribute "aria-controls" "site-nav-panel")
         , Border.rounded Theme.radius.sm
         , Border.width 1
         , Border.color
             (if isOpen then
-                palette.primary
+                colors.primary
 
              else
-                palette.border
+                colors.border
             )
-        , Background.color palette.surface
+        , Background.color colors.surface
         , Font.size type_.bodySize
-        , Font.color palette.textPrimary
+        , Font.color colors.textPrimary
         ]
         { onPress = Just onPress
         , label = menuButtonLabel isOpen
@@ -260,33 +373,40 @@ menuButtonLabel isOpen =
         ]
 
 
-navLink : String -> String -> String -> Element msg
-navLink currentPath path label =
+navLink : Theme.Mode -> String -> String -> String -> Element msg
+navLink themeMode currentPath path label =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         isActive =
             currentPath == path
 
         color =
             if isActive then
-                palette.primary
+                colors.primary
 
             else
-                palette.textSecondary
+                colors.textSecondary
     in
     link
         [ Font.color color
         , Font.medium
-        , Element.mouseOver [ Font.color palette.primary ]
+        , Element.mouseOver [ Font.color colors.primary ]
         ]
         { url = path, label = text label }
 
 
-externalLink : String -> String -> Element msg
-externalLink url label =
+externalLink : Theme.Mode -> String -> String -> Element msg
+externalLink themeMode url label =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     newTabLink
-        [ Font.color palette.textSecondary
+        [ Font.color colors.textSecondary
         , Font.medium
-        , Element.mouseOver [ Font.color palette.primary ]
+        , Element.mouseOver [ Font.color colors.primary ]
         ]
         { url = url, label = text label }
 
@@ -295,9 +415,12 @@ externalLink url label =
 -- FOOTER
 
 
-footer : Viewport.Viewport -> Element msg
-footer viewport =
+footer : Theme.Mode -> Viewport.Viewport -> Element msg
+footer themeMode viewport =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         brandBlock =
             column
                 [ alignTop
@@ -305,17 +428,17 @@ footer viewport =
                 , spacing Theme.space.sm
                 , width fill
                 ]
-                [ Logo.full { wordmarkSize = 18, markSize = 30 }
+                [ Logo.full themeMode { wordmarkSize = 18, markSize = 30 }
                 ]
 
         projectBlock =
-            footerColumn "Project"
+            footerColumn themeMode "Project"
                 [ ( "https://github.com/quone-lang", "GitHub" )
                 , ( "https://github.com/quone-lang/quone/issues", "Issue tracker" )
                 ]
 
         learnBlock =
-            footerColumn "Learn"
+            footerColumn themeMode "Learn"
                 [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
                   , "Language reference"
                   )
@@ -323,7 +446,7 @@ footer viewport =
                 ]
 
         builtOnBlock =
-            footerColumn "Built on"
+            footerColumn themeMode "Built on"
                 [ ( "https://www.r-project.org/", "R" )
                 , ( "https://www.haskell.org/", "Haskell" )
                 , ( "https://elm-lang.org/", "Elm" )
@@ -334,9 +457,9 @@ footer viewport =
     in
     el
         [ width fill
-        , Background.color palette.surface
+        , Background.color colors.surface
         , Border.widthEach { top = 1, right = 0, bottom = 0, left = 0 }
-        , Border.color palette.border
+        , Border.color colors.border
         , paddingXY (horizontalPadding viewport) Theme.space.xl
         ]
         (column
@@ -361,12 +484,12 @@ footer viewport =
             , el
                 [ width fill
                 , Border.widthEach { top = 1, right = 0, bottom = 0, left = 0 }
-                , Border.color palette.border
+                , Border.color colors.border
                 ]
                 none
             , el
                 [ alignLeft
-                , Font.color palette.textMuted
+                , Font.color colors.textMuted
                 , Font.size type_.smallSize
                 ]
                 (text "Quone v0.0.1 - pre-release work in progress. APIs and syntax may change.")
@@ -374,34 +497,42 @@ footer viewport =
         )
 
 
-footerColumn : String -> List ( String, String ) -> Element msg
-footerColumn heading links =
+footerColumn : Theme.Mode -> String -> List ( String, String ) -> Element msg
+footerColumn themeMode heading links =
     column
         [ alignTop
         , spacing Theme.space.sm
         , width fill
         ]
-        (footerHeading heading
-            :: List.map (\( url, label ) -> footerLink url label) links
+        (footerHeading themeMode heading
+            :: List.map (\( url, label ) -> footerLink themeMode url label) links
         )
 
 
-footerHeading : String -> Element msg
-footerHeading label =
+footerHeading : Theme.Mode -> String -> Element msg
+footerHeading themeMode label =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
-        [ Font.color palette.textPrimary
+        [ Font.color colors.textPrimary
         , Font.semiBold
         , Font.size type_.smallSize
         ]
         (text label)
 
 
-footerLink : String -> String -> Element msg
-footerLink url label =
+footerLink : Theme.Mode -> String -> String -> Element msg
+footerLink themeMode url label =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     newTabLink
-        [ Font.color palette.textSecondary
+        [ Font.color colors.textSecondary
         , Font.size type_.smallSize
-        , Element.mouseOver [ Font.color palette.primary ]
+        , Element.mouseOver [ Font.color colors.primary ]
         ]
         { url = url, label = text label }
 
@@ -413,10 +544,11 @@ footerLink url label =
 {-| A standard centred section with the default content max width.
 -}
 section :
-    Viewport.Viewport
+    Theme.Mode
+    -> Viewport.Viewport
     -> { title : Maybe String, kicker : Maybe String, body : Element msg }
     -> Element msg
-section viewport { title, kicker, body } =
+section themeMode viewport { title, kicker, body } =
     el
         [ width fill, paddingXY (horizontalPadding viewport) 0 ]
         (column
@@ -425,8 +557,8 @@ section viewport { title, kicker, body } =
             , spacing (sectionHeaderSpacing viewport)
             ]
             (List.filterMap identity
-                [ Maybe.map (\k -> el [ centerX ] (sectionKicker k)) kicker
-                , Maybe.map (sectionTitle viewport) title
+                [ Maybe.map (\k -> el [ centerX ] (sectionKicker themeMode k)) kicker
+                , Maybe.map (sectionTitle themeMode viewport) title
                 , Just body
                 ]
             )
@@ -435,8 +567,8 @@ section viewport { title, kicker, body } =
 
 {-| A wider section for hero-style content (still centred).
 -}
-wideSection : Viewport.Viewport -> { body : Element msg } -> Element msg
-wideSection viewport { body } =
+wideSection : Theme.Mode -> Viewport.Viewport -> { body : Element msg } -> Element msg
+wideSection _ viewport { body } =
     el
         [ width fill, paddingXY (horizontalPadding viewport) 0 ]
         (el
@@ -447,8 +579,12 @@ wideSection viewport { body } =
         )
 
 
-sectionTitle : Viewport.Viewport -> String -> Element msg
-sectionTitle viewport s =
+sectionTitle : Theme.Mode -> Viewport.Viewport -> String -> Element msg
+sectionTitle themeMode viewport s =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     paragraph
         [ Font.size
             (if Viewport.isHandset viewport then
@@ -458,7 +594,7 @@ sectionTitle viewport s =
                 type_.h2Size
             )
         , Font.semiBold
-        , Font.color palette.textPrimary
+        , Font.color colors.textPrimary
         , Font.family [ Theme.fontDisplay, Font.sansSerif ]
         , Font.letterSpacing -0.6
         , Font.center
@@ -467,9 +603,9 @@ sectionTitle viewport s =
         [ text s ]
 
 
-sectionKicker : String -> Element msg
-sectionKicker s =
-    Eyebrow.view s
+sectionKicker : Theme.Mode -> String -> Element msg
+sectionKicker themeMode s =
+    Eyebrow.view themeMode s
 
 
 horizontalPadding : Viewport.Viewport -> Int

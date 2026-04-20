@@ -27,11 +27,7 @@ import Element
         , height
         , htmlAttribute
         , minimum
-        , padding
         , paddingXY
-        , paragraph
-        , rgb255
-        , rgba255
         , row
         , scrollbarX
         , spacing
@@ -44,7 +40,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Html.Attributes
 import Set exposing (Set)
-import Ui.Theme as Theme exposing (palette, type_)
+import Ui.Theme as Theme exposing (type_)
 import Ui.Viewport as Viewport
 
 
@@ -59,18 +55,22 @@ type Language
 
 {-| A standalone code block with a language label.
 -}
-view : Viewport.Viewport -> Language -> String -> Element msg
-view viewport lang source =
+view : Theme.Mode -> Viewport.Viewport -> Language -> String -> Element msg
+view themeMode viewport lang source =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     column
         [ width fill
-        , Background.color palette.codeSurface
+        , Background.color colors.codeSurface
         , Border.rounded Theme.radius.md
         , Border.width 1
-        , Border.color palette.border
+        , Border.color colors.border
         , spacing 0
         ]
-        [ languageBadge lang
-        , block viewport lang source
+        [ languageBadge themeMode lang
+        , block themeMode viewport lang source
         ]
 
 
@@ -83,8 +83,8 @@ and the longer code-example sections.
 container.
 
 -}
-viewSideBySide : Viewport.Viewport -> { quone : String, r : String } -> Element msg
-viewSideBySide viewport parts =
+viewSideBySide : Theme.Mode -> Viewport.Viewport -> { quone : String, r : String } -> Element msg
+viewSideBySide themeMode viewport parts =
     let
         spacing_ =
             if Viewport.isHandset viewport then
@@ -101,7 +101,7 @@ viewSideBySide viewport parts =
                 , htmlAttribute (Html.Attributes.style "min-width" "0")
                 , htmlAttribute (Html.Attributes.style "flex" "1 1 320px")
                 ]
-                (view viewport lang source)
+                (view themeMode viewport lang source)
     in
     wrappedRow
         [ width fill
@@ -118,13 +118,16 @@ suitable for embedding inside another container (the hero REPL renders
 its compiled output this way so the R looks like printed terminal
 output, not a nested code card).
 -}
-viewBare : Viewport.Viewport -> Language -> String -> Element msg
-viewBare viewport lang source =
+viewBare : Theme.Mode -> Viewport.Viewport -> Language -> String -> Element msg
+viewBare themeMode viewport lang source =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         renderedLines =
             source
                 |> String.lines
-                |> List.map (renderLine lang)
+                |> List.map (renderLine themeMode lang)
     in
     column
         [ Font.family [ Theme.fontMono, Font.monospace ]
@@ -135,7 +138,7 @@ viewBare viewport lang source =
              else
                 type_.codeSize
             )
-        , Font.color palette.codePlain
+        , Font.color colors.codePlain
         , spacing 4
         , width fill
         ]
@@ -144,15 +147,19 @@ viewBare viewport lang source =
 
 {-| Inline code, used inside paragraphs.
 -}
-viewInline : String -> Element msg
-viewInline s =
+viewInline : Theme.Mode -> String -> Element msg
+viewInline themeMode s =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
         [ Font.family [ Theme.fontMono, Font.monospace ]
         , Font.size type_.codeSmallSize
-        , Background.color palette.codeSurface
+        , Background.color colors.codeSurface
         , paddingXY 6 2
         , Border.rounded Theme.radius.sm
-        , Font.color palette.codeKeyword
+        , Font.color colors.codeKeyword
         ]
         (text s)
 
@@ -161,9 +168,12 @@ viewInline s =
 -- INTERNALS
 
 
-languageBadge : Language -> Element msg
-languageBadge lang =
+languageBadge : Theme.Mode -> Language -> Element msg
+languageBadge themeMode lang =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         label =
             case lang of
                 Quone ->
@@ -175,22 +185,25 @@ languageBadge lang =
     el
         [ Font.family [ Theme.fontMono, Font.monospace ]
         , Font.size type_.codeSmallSize
-        , Font.color palette.textMuted
+        , Font.color colors.textMuted
         , paddingXY Theme.space.md Theme.space.sm
         , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-        , Border.color palette.border
+        , Border.color colors.border
         , width fill
         ]
         (text label)
 
 
-block : Viewport.Viewport -> Language -> String -> Element msg
-block viewport lang source =
+block : Theme.Mode -> Viewport.Viewport -> Language -> String -> Element msg
+block themeMode viewport lang source =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         renderedLines =
             source
                 |> String.lines
-                |> List.map (renderLine lang)
+                |> List.map (renderLine themeMode lang)
     in
     el
         [ width fill
@@ -206,7 +219,7 @@ block viewport lang source =
                  else
                     type_.codeSize
                 )
-            , Font.color palette.codePlain
+            , Font.color colors.codePlain
             , paddingXY
                 (if Viewport.isHandset viewport then
                     Theme.space.md
@@ -228,8 +241,8 @@ block viewport lang source =
         )
 
 
-renderLine : Language -> String -> Element msg
-renderLine lang line =
+renderLine : Theme.Mode -> Language -> String -> Element msg
+renderLine themeMode lang line =
     if String.isEmpty line then
         el [ height (Element.px 22) ] (text "\u{00A0}")
 
@@ -238,7 +251,7 @@ renderLine lang line =
             [ spacing 0
             , htmlAttribute (Html.Attributes.style "white-space" "pre")
             ]
-            (tokenise lang line |> List.map renderToken)
+            (tokenise lang line |> List.map (renderToken themeMode))
 
 
 
@@ -539,26 +552,30 @@ typeSet lang =
 -- TOKEN RENDERING
 
 
-renderToken : Token -> Element msg
-renderToken token =
+renderToken : Theme.Mode -> Token -> Element msg
+renderToken themeMode token =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     case token of
         Plain s ->
-            el [ Font.color palette.codePlain ] (text s)
+            el [ Font.color colors.codePlain ] (text s)
 
         Keyword s ->
-            el [ Font.color palette.codeKeyword, Font.semiBold ] (text s)
+            el [ Font.color colors.codeKeyword, Font.semiBold ] (text s)
 
         TypeName s ->
-            el [ Font.color palette.codeType, Font.medium ] (text s)
+            el [ Font.color colors.codeType, Font.medium ] (text s)
 
         StringLit s ->
-            el [ Font.color palette.codeString ] (text s)
+            el [ Font.color colors.codeString ] (text s)
 
         NumberLit s ->
-            el [ Font.color palette.codeNumber ] (text s)
+            el [ Font.color colors.codeNumber ] (text s)
 
         Comment s ->
-            el [ Font.color palette.codeComment, Font.italic ] (text s)
+            el [ Font.color colors.codeComment, Font.italic ] (text s)
 
         Operator s ->
-            el [ Font.color palette.codeOperator ] (text s)
+            el [ Font.color colors.codeOperator ] (text s)

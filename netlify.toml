@@ -14,9 +14,9 @@
   to = "/index.html"
   status = 200
 
-# Long cache on the compiled Elm bundle (it's content-addressed by name
-# whenever you bump quone-lang.org's deploy, so this is safe).
+# Long cache on the compiled Elm bundle. build.sh fingerprints the file
+# as elm-<hash>.js, so this is safe across deploys.
 [[headers]]
-  for = "/elm.js"
+  for = "/elm-*.js"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"

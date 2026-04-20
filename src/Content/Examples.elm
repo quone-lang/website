@@ -142,12 +142,15 @@ adslSummarySnippet =
         , sex        : Vector Character
         }
 
-adsl_summary : Adsl -> dataframe
-    { arm        : Vector Character
-    , n_subjects : Vector Integer
-    , mean_age   : Vector Double
-    , pct_female : Vector Double
-    }
+adsl_summary :
+    Adsl
+    -> dataframe
+        { arm        : Vector Character
+        , n_subjects : Vector Integer
+        , mean_age   : Vector Double
+        , pct_female : Vector Double
+        }
+
 adsl_summary adsl <-
     adsl
         |> group_by { arm }

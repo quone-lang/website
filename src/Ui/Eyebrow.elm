@@ -20,11 +20,15 @@ import Element
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Ui.Theme as Theme exposing (palette, type_)
+import Ui.Theme as Theme exposing (type_)
 
 
-view : String -> Element msg
-view label =
+view : Theme.Mode -> String -> Element msg
+view themeMode label =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     row
         [ spacing 10
         , centerY
@@ -32,14 +36,14 @@ view label =
         [ el
             [ width (px 22)
             , height (px 2)
-            , Background.color palette.secondary
+            , Background.color colors.secondary
             , Border.rounded 1
             , centerY
             ]
             Element.none
         , el
             [ Font.size type_.smallSize
-            , Font.color palette.primary
+            , Font.color colors.primary
             , Font.semiBold
             , Font.letterSpacing 1.6
             , centerY

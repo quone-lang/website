@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://quone-lang.org/sitemap.xml

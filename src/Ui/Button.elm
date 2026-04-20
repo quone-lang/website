@@ -20,26 +20,26 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
-import Ui.Theme as Theme exposing (palette, type_)
+import Ui.Theme as Theme exposing (type_)
 
 
 
 -- BUTTONS (msg-producing)
 
 
-primary : { onPress : Maybe msg, label : String } -> Element msg
-primary { onPress, label } =
+primary : Theme.Mode -> { onPress : Maybe msg, label : String } -> Element msg
+primary themeMode { onPress, label } =
     Input.button
-        primaryStyle
+        (primaryStyle themeMode)
         { onPress = onPress
         , label = el [ Element.centerX ] (text label)
         }
 
 
-secondary : { onPress : Maybe msg, label : String } -> Element msg
-secondary { onPress, label } =
+secondary : Theme.Mode -> { onPress : Maybe msg, label : String } -> Element msg
+secondary themeMode { onPress, label } =
     Input.button
-        secondaryStyle
+        (secondaryStyle themeMode)
         { onPress = onPress
         , label = el [ Element.centerX ] (text label)
         }
@@ -49,19 +49,19 @@ secondary { onPress, label } =
 -- LINK BUTTONS (navigate via URL)
 
 
-linkPrimary : { url : String, label : String } -> Element msg
-linkPrimary { url, label } =
+linkPrimary : Theme.Mode -> { url : String, label : String } -> Element msg
+linkPrimary themeMode { url, label } =
     link
-        primaryStyle
+        (primaryStyle themeMode)
         { url = url
         , label = el [ Element.centerX ] (text label)
         }
 
 
-linkSecondary : { url : String, label : String } -> Element msg
-linkSecondary { url, label } =
+linkSecondary : Theme.Mode -> { url : String, label : String } -> Element msg
+linkSecondary themeMode { url, label } =
     link
-        secondaryStyle
+        (secondaryStyle themeMode)
         { url = url
         , label = el [ Element.centerX ] (text label)
         }
@@ -71,30 +71,38 @@ linkSecondary { url, label } =
 -- STYLES
 
 
-primaryStyle : List (Element.Attribute msg)
-primaryStyle =
-    [ Background.color palette.primary
-    , Font.color palette.textOnPrimary
+primaryStyle : Theme.Mode -> List (Element.Attribute msg)
+primaryStyle themeMode =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
+    [ Background.color colors.primary
+    , Font.color colors.textOnPrimary
     , Font.medium
     , Font.size type_.bodySize
     , paddingXY Theme.space.lg (Theme.space.md - 2)
     , Border.rounded Theme.radius.md
-    , Element.mouseOver [ Background.color palette.primaryHover ]
+    , Element.mouseOver [ Background.color colors.primaryHover ]
     ]
 
 
-secondaryStyle : List (Element.Attribute msg)
-secondaryStyle =
-    [ Background.color palette.surface
-    , Font.color palette.textPrimary
+secondaryStyle : Theme.Mode -> List (Element.Attribute msg)
+secondaryStyle themeMode =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
+    [ Background.color colors.surface
+    , Font.color colors.textPrimary
     , Font.medium
     , Font.size type_.bodySize
     , paddingXY Theme.space.lg (Theme.space.md - 2)
     , Border.rounded Theme.radius.md
     , Border.width 1
-    , Border.color palette.border
+    , Border.color colors.border
     , Element.mouseOver
-        [ Background.color palette.codeSurface
-        , Border.color palette.primary
+        [ Background.color colors.codeSurface
+        , Border.color colors.primary
         ]
     ]

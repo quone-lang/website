@@ -8,18 +8,34 @@
       name="description"
       content="Quone is a statically typed functional language with Hindley-Milner inference and native dataframe verbs that compiles to readable R."
     />
-    <meta name="theme-color" content="#276dc3" />
+    <meta name="robots" content="index,follow" />
+    <meta name="theme-color" id="theme-color-meta" content="#fafaf9" />
+    <link rel="canonical" id="canonical-url" href="https://quone-lang.org/" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Quone" />
     <meta property="og:title" content="Quone - a typed functional language for R" />
     <meta
       property="og:description"
       content="Hindley-Milner inference, custom types, native dataframe verbs - compiled to readable R."
     />
     <meta property="og:url" content="https://quone-lang.org" />
+    <meta property="og:image" content="https://quone-lang.org/social-card.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:alt" content="Quone - a typed functional language for R" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Quone - a typed functional language for R" />
+    <meta
+      name="twitter:description"
+      content="Hindley-Milner inference, custom types, native dataframe verbs - compiled to readable R."
+    />
+    <meta name="twitter:image" content="https://quone-lang.org/social-card.svg" />
+    <meta name="twitter:image:alt" content="Quone - a typed functional language for R" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,16 +46,110 @@
     />
 
     <style>
+      :root {
+        color-scheme: light;
+        --page-bg: #fafaf9;
+        --page-radial-primary: rgba(39, 109, 195, 0.06);
+        --page-radial-secondary: rgba(224, 96, 76, 0.04);
+        --hero-swap-accent: #276dc3;
+        --repl-shadow:
+          0 1px 1px rgba(27, 34, 44, 0.04),
+          0 6px 18px rgba(27, 34, 44, 0.08),
+          0 18px 36px rgba(27, 34, 44, 0.04);
+        --tok-pkg: #0d9488;
+        --tok-op: #b03a28;
+        --tok-fn: #6d28d9;
+        --tok-paren: #4a4a4a;
+        --tok-str: #a16207;
+        --tab-text: #8a8a8a;
+        --tab-hover-text: #1a1a1a;
+        --tab-hover-bg: rgba(39, 109, 195, 0.04);
+        --tab-active-text: #1a1a1a;
+        --tab-active-border: #276dc3;
+        --tab-focus: #276dc3;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+          --page-bg: #0b1015;
+          --page-radial-primary: rgba(55, 126, 214, 0.18);
+          --page-radial-secondary: rgba(240, 123, 103, 0.12);
+          --hero-swap-accent: #98c6ff;
+          --repl-shadow:
+            0 1px 1px rgba(0, 0, 0, 0.28),
+            0 10px 24px rgba(0, 0, 0, 0.34),
+            0 24px 48px rgba(0, 0, 0, 0.24);
+          --tok-pkg: #54d1c8;
+          --tok-op: #ff907a;
+          --tok-fn: #bc9cff;
+          --tok-paren: #c8d0da;
+          --tok-str: #e8b763;
+          --tab-text: #8d97a7;
+          --tab-hover-text: #f2f5f8;
+          --tab-hover-bg: rgba(55, 126, 214, 0.14);
+          --tab-active-text: #f2f5f8;
+          --tab-active-border: #98c6ff;
+          --tab-focus: #98c6ff;
+        }
+      }
+
+      :root[data-theme="light"] {
+        color-scheme: light;
+        --page-bg: #fafaf9;
+        --page-radial-primary: rgba(39, 109, 195, 0.06);
+        --page-radial-secondary: rgba(224, 96, 76, 0.04);
+        --hero-swap-accent: #276dc3;
+        --repl-shadow:
+          0 1px 1px rgba(27, 34, 44, 0.04),
+          0 6px 18px rgba(27, 34, 44, 0.08),
+          0 18px 36px rgba(27, 34, 44, 0.04);
+        --tok-pkg: #0d9488;
+        --tok-op: #b03a28;
+        --tok-fn: #6d28d9;
+        --tok-paren: #4a4a4a;
+        --tok-str: #a16207;
+        --tab-text: #8a8a8a;
+        --tab-hover-text: #1a1a1a;
+        --tab-hover-bg: rgba(39, 109, 195, 0.04);
+        --tab-active-text: #1a1a1a;
+        --tab-active-border: #276dc3;
+        --tab-focus: #276dc3;
+      }
+
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --page-bg: #0b1015;
+        --page-radial-primary: rgba(55, 126, 214, 0.18);
+        --page-radial-secondary: rgba(240, 123, 103, 0.12);
+        --hero-swap-accent: #98c6ff;
+        --repl-shadow:
+          0 1px 1px rgba(0, 0, 0, 0.28),
+          0 10px 24px rgba(0, 0, 0, 0.34),
+          0 24px 48px rgba(0, 0, 0, 0.24);
+        --tok-pkg: #54d1c8;
+        --tok-op: #ff907a;
+        --tok-fn: #bc9cff;
+        --tok-paren: #c8d0da;
+        --tok-str: #e8b763;
+        --tab-text: #8d97a7;
+        --tab-hover-text: #f2f5f8;
+        --tab-hover-bg: rgba(55, 126, 214, 0.14);
+        --tab-active-text: #f2f5f8;
+        --tab-active-border: #98c6ff;
+        --tab-focus: #98c6ff;
+      }
+
       html, body {
         margin: 0;
         padding: 0;
         height: 100%;
-        background: #fafaf9;
+        background: var(--page-bg);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         background-image:
-          radial-gradient(1000px circle at 10% -10%, rgba(39, 109, 195, 0.06), transparent 40%),
-          radial-gradient(900px circle at 110% 10%, rgba(224, 96, 76, 0.04), transparent 45%);
+          radial-gradient(1000px circle at 10% -10%, var(--page-radial-primary), transparent 40%),
+          radial-gradient(900px circle at 110% 10%, var(--page-radial-secondary), transparent 45%);
         background-attachment: fixed;
       }
       #root, .elm-app {
@@ -64,7 +174,7 @@
         top: 50%;
         transform: translateY(calc(-50% + 0.12em));
         opacity: 0;
-        color: #276dc3;
+        color: var(--hero-swap-accent);
         pointer-events: none;
         font-family: "Bitcount Grid Double", "JetBrains Mono", monospace;
         font-weight: 400;
@@ -91,16 +201,13 @@
 
       /* Hero R REPL - decorative R console with a Run button. */
       .repl-window {
-        box-shadow:
-          0 1px 1px rgba(27, 34, 44, 0.04),
-          0 6px 18px rgba(27, 34, 44, 0.08),
-          0 18px 36px rgba(27, 34, 44, 0.04);
+        box-shadow: var(--repl-shadow);
       }
-      .repl-command .tok-pkg { color: #0d9488; font-weight: 600; }
-      .repl-command .tok-op  { color: #b03a28; }
-      .repl-command .tok-fn  { color: #6d28d9; font-weight: 500; }
-      .repl-command .tok-paren { color: #4a4a4a; }
-      .repl-command .tok-str { color: #a16207; }
+      .repl-command .tok-pkg { color: var(--tok-pkg); font-weight: 600; }
+      .repl-command .tok-op  { color: var(--tok-op); }
+      .repl-command .tok-fn  { color: var(--tok-fn); font-weight: 500; }
+      .repl-command .tok-paren { color: var(--tok-paren); }
+      .repl-command .tok-str { color: var(--tok-str); }
 
       .repl-run {
         transition: background-color 140ms ease, transform 80ms ease;
@@ -174,7 +281,7 @@
         font-family: "JetBrains Mono", ui-monospace, SFMono-Regular,
           Menlo, Consolas, monospace;
         font-size: 13px;
-        color: #8a8a8a;
+        color: var(--tab-text);
         cursor: pointer;
         transition: color 140ms ease, border-color 140ms ease,
           background-color 140ms ease;
@@ -182,16 +289,16 @@
         line-height: 1.2;
       }
       .snippet-tab:hover {
-        color: #1a1a1a;
-        background-color: rgba(39, 109, 195, 0.04);
+        color: var(--tab-hover-text);
+        background-color: var(--tab-hover-bg);
       }
       .snippet-tab-active {
-        color: #1a1a1a;
-        border-bottom-color: #276dc3;
+        color: var(--tab-active-text);
+        border-bottom-color: var(--tab-active-border);
         font-weight: 500;
       }
       .snippet-tab:focus-visible {
-        outline: 2px solid #276dc3;
+        outline: 2px solid var(--tab-focus);
         outline-offset: -2px;
         border-radius: 2px;
       }
@@ -199,15 +306,75 @@
   </head>
   <body>
     <div id="root"></div>
-    <script src="/elm.js"></script>
     <script>
-      var app = Elm.Main.init({
-        node: document.getElementById("root"),
-        flags: {
-          width: window.innerWidth,
-          height: window.innerHeight,
-        },
-      });
+      (function () {
+        var canonical = document.getElementById("canonical-url");
+        if (!canonical) return;
+
+        var canonicalUrl = new URL(window.location.pathname || "/", "https://quone-lang.org");
+        canonical.href = canonicalUrl.toString();
+      })();
+    </script>
+    <script src="/__ELM_BUNDLE__"></script>
+    <script>
+      (function () {
+        var darkMedia = window.matchMedia("(prefers-color-scheme: dark)");
+        var root = document.documentElement;
+        var themeColorMeta = document.getElementById("theme-color-meta");
+        var themePreference = "system";
+
+        function resolvedTheme(preference) {
+          if (preference === "dark" || preference === "light") {
+            return preference;
+          }
+
+          return darkMedia.matches ? "dark" : "light";
+        }
+
+        function applyThemePreference(preference) {
+          themePreference = preference;
+
+          if (preference === "dark" || preference === "light") {
+            root.setAttribute("data-theme", preference);
+          } else {
+            root.removeAttribute("data-theme");
+          }
+
+          if (themeColorMeta) {
+            themeColorMeta.content =
+              resolvedTheme(preference) === "dark" ? "#0b1015" : "#fafaf9";
+          }
+        }
+
+        var app = Elm.Main.init({
+          node: document.getElementById("root"),
+          flags: {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            prefersDark: darkMedia.matches,
+          },
+        });
+
+        var notifyThemeChange = function(event) {
+          applyThemePreference(themePreference);
+
+          if (app.ports && app.ports.systemThemeChanged) {
+            app.ports.systemThemeChanged.send(event.matches);
+          }
+        };
+
+        if (app.ports && app.ports.setThemePreference) {
+          app.ports.setThemePreference.subscribe(applyThemePreference);
+        }
+
+        if (darkMedia.addEventListener) {
+          darkMedia.addEventListener("change", notifyThemeChange);
+        } else if (darkMedia.addListener) {
+          darkMedia.addListener(notifyThemeChange);
+        }
+
+        applyThemePreference(themePreference);
+      })();
     </script>
   </body>
 </html>

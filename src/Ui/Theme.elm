@@ -1,6 +1,11 @@
 module Ui.Theme exposing
-    ( Palette
+    ( Mode(..)
+    , modeFromPrefersDark
+    , isDark
+    , themeColor
+    , Palette
     , palette
+    , paletteFor
     , Type
     , type_
     , Space
@@ -9,6 +14,7 @@ module Ui.Theme exposing
     , radius
     , Shadow
     , shadow
+    , shadowFor
     , maxContentWidth
     , fontSans
     , fontDisplay
@@ -33,6 +39,44 @@ of statistical computing without being kitsch.
 
 import Element exposing (Color, rgb255, rgba255)
 import Element.Font as Font
+
+
+
+-- MODE
+
+
+type Mode
+    = Light
+    | Dark
+
+
+modeFromPrefersDark : Bool -> Mode
+modeFromPrefersDark prefersDark =
+    if prefersDark then
+        Dark
+
+    else
+        Light
+
+
+isDark : Mode -> Bool
+isDark mode =
+    case mode of
+        Light ->
+            False
+
+        Dark ->
+            True
+
+
+themeColor : Mode -> String
+themeColor mode =
+    case mode of
+        Light ->
+            "#fafaf9"
+
+        Dark ->
+            "#0b1015"
 
 
 
@@ -91,6 +135,40 @@ palette =
     , codeOperator = rgb255 0xB0 0x3A 0x28
     , codePlain = rgb255 0x1A 0x1A 0x1A
     }
+
+
+darkPalette : Palette
+darkPalette =
+    { primary = rgb255 0x37 0x7E 0xD6
+    , primaryDark = rgb255 0x98 0xC6 0xFF
+    , primaryHover = rgb255 0x49 0x92 0xEC
+    , secondary = rgb255 0xF0 0x7B 0x67
+    , background = rgb255 0x0B 0x10 0x15
+    , surface = rgb255 0x14 0x19 0x20
+    , codeSurface = rgb255 0x0F 0x14 0x1B
+    , border = rgb255 0x2A 0x33 0x3D
+    , textPrimary = rgb255 0xF2 0xF5 0xF8
+    , textSecondary = rgb255 0xC8 0xD0 0xDA
+    , textMuted = rgb255 0x8D 0x97 0xA7
+    , textOnPrimary = rgb255 0xFF 0xFF 0xFF
+    , codeKeyword = rgb255 0xFF 0x90 0x7A
+    , codeType = rgb255 0x54 0xD1 0xC8
+    , codeString = rgb255 0xE8 0xB7 0x63
+    , codeNumber = rgb255 0xBC 0x9C 0xFF
+    , codeComment = rgb255 0x8D 0x97 0xA7
+    , codeOperator = rgb255 0xFF 0x90 0x7A
+    , codePlain = rgb255 0xF2 0xF5 0xF8
+    }
+
+
+paletteFor : Mode -> Palette
+paletteFor mode =
+    case mode of
+        Light ->
+            palette
+
+        Dark ->
+            darkPalette
 
 
 
@@ -213,6 +291,23 @@ shadow =
     { soft = rgba255 0x1B 0x22 0x2C 0.06
     , medium = rgba255 0x1B 0x22 0x2C 0.12
     }
+
+
+darkShadow : Shadow
+darkShadow =
+    { soft = rgba255 0x00 0x00 0x00 0.28
+    , medium = rgba255 0x00 0x00 0x00 0.44
+    }
+
+
+shadowFor : Mode -> Shadow
+shadowFor mode =
+    case mode of
+        Light ->
+            shadow
+
+        Dark ->
+            darkShadow
 
 
 

@@ -6,12 +6,12 @@ module Ui.Repl exposing
 {-| A small visual stand-in for the R REPL.
 
 The REPL is decorative: it shows a Quone-package call (`quone::compile`)
-that the user can "run" via a green play button. The site supplies the
-output state (idle, compiling, or compiled with a generated R block),
+that the user can preview via a green button. The site supplies the
+output state (idle, loading preview, or showing a generated R block),
 and this module renders the chrome around it.
 
 The REPL is not a real terminal; it just *looks* like one so the
-"compile to R" interaction feels tangible without forcing the user to
+"preview generated R" interaction feels tangible without forcing the user to
 read documentation. Animations (cursor blink, output reveal, spinner)
 live in `static/index.html`.
 
@@ -42,7 +42,7 @@ import Element.Input as Input
 import Html
 import Html.Attributes
 import Ui.CodeBlock as CodeBlock
-import Ui.Theme as Theme exposing (palette, type_)
+import Ui.Theme as Theme exposing (type_)
 import Ui.Viewport as Viewport
 
 
@@ -65,30 +65,35 @@ type Output
 
 
 view :
-    Viewport.Viewport
+    Theme.Mode
+    -> Viewport.Viewport
     ->
         { command : String
         , output : Output
         , onRun : msg
         }
     -> Element msg
-view viewport config =
+view themeMode viewport config =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     column
         [ width fill
-        , Background.color reSurface
+        , Background.color (reSurface themeMode)
         , Border.rounded Theme.radius.md
         , Border.width 1
-        , Border.color palette.border
+        , Border.color colors.border
         , htmlAttribute (Html.Attributes.class "repl-window")
         , htmlAttribute (Html.Attributes.style "overflow" "hidden")
         ]
-        [ titleBar viewport
-        , inputRow viewport
+        [ titleBar themeMode viewport
+        , inputRow themeMode viewport
             { command = config.command
             , output = config.output
             , onRun = config.onRun
             }
-        , outputArea viewport config.output
+        , outputArea themeMode viewport config.output
         ]
 
 
@@ -96,35 +101,55 @@ view viewport config =
 -- INTERNALS
 
 
-reSurface : Element.Color
-reSurface =
-    rgb255 0xFB 0xFA 0xF7
+reSurface : Theme.Mode -> Element.Color
+reSurface themeMode =
+    if Theme.isDark themeMode then
+        rgb255 0x12 0x18 0x20
+
+    else
+        rgb255 0xFB 0xFA 0xF7
 
 
-reSurfaceDark : Element.Color
-reSurfaceDark =
-    rgb255 0xF1 0xEE 0xE8
+reSurfaceDark : Theme.Mode -> Element.Color
+reSurfaceDark themeMode =
+    if Theme.isDark themeMode then
+        rgb255 0x0D 0x13 0x1A
+
+    else
+        rgb255 0xF1 0xEE 0xE8
 
 
-runGreen : Element.Color
-runGreen =
-    rgb255 0x2E 0x7D 0x32
+runGreen : Theme.Mode -> Element.Color
+runGreen themeMode =
+    if Theme.isDark themeMode then
+        rgb255 0x37 0x8E 0x48
+
+    else
+        rgb255 0x2E 0x7D 0x32
 
 
-runGreenHover : Element.Color
-runGreenHover =
-    rgb255 0x38 0x96 0x3C
+runGreenHover : Theme.Mode -> Element.Color
+runGreenHover themeMode =
+    if Theme.isDark themeMode then
+        rgb255 0x45 0xA4 0x56
+
+    else
+        rgb255 0x38 0x96 0x3C
 
 
-titleBar : Viewport.Viewport -> Element msg
-titleBar viewport =
+titleBar : Theme.Mode -> Viewport.Viewport -> Element msg
+titleBar themeMode viewport =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     if Viewport.isHandset viewport then
         row
             [ width fill
-            , Background.color reSurfaceDark
+            , Background.color (reSurfaceDark themeMode)
             , paddingXY Theme.space.md (Theme.space.sm + 2)
             , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-            , Border.color palette.border
+            , Border.color colors.border
             , spacing Theme.space.sm
             ]
             [ trafficLights ]
@@ -132,17 +157,17 @@ titleBar viewport =
     else
         row
             [ width fill
-            , Background.color reSurfaceDark
+            , Background.color (reSurfaceDark themeMode)
             , paddingXY Theme.space.md (Theme.space.sm + 2)
             , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-            , Border.color palette.border
+            , Border.color colors.border
             , spacing Theme.space.md
             ]
             [ trafficLights
             , el
                 [ Font.family [ Theme.fontMono, Font.monospace ]
                 , Font.size type_.codeSmallSize
-                , Font.color palette.textMuted
+                , Font.color colors.textMuted
                 , Element.centerX
                 ]
                 (text "R 4.4.1 - Console")
@@ -171,15 +196,19 @@ trafficDot color =
 
 
 inputRow :
-    Viewport.Viewport
+    Theme.Mode
+    -> Viewport.Viewport
     ->
         { command : String
         , output : Output
         , onRun : msg
         }
     -> Element msg
-inputRow viewport { command, output, onRun } =
+inputRow themeMode viewport { command, output, onRun } =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         isRunning =
             output == Compiling
 
@@ -193,16 +222,17 @@ inputRow viewport { command, output, onRun } =
                 , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
                 , htmlAttribute (Html.Attributes.class "repl-command-cell")
                 ]
-                (commandLine viewport command)
+                (commandLine themeMode viewport command)
 
         promptRow =
             row
                 [ width fill, spacing Theme.space.sm ]
-                [ promptGlyph, commandCell ]
+                [ promptGlyph themeMode, commandCell ]
 
         button =
             runButton
-                { isRunning = isRunning
+                { themeMode = themeMode
+                , isRunning = isRunning
                 , onRun = onRun
                 , compact = compact
                 }
@@ -213,8 +243,8 @@ inputRow viewport { command, output, onRun } =
             , paddingXY (replPadding viewport) (Theme.space.sm + 2)
             , spacing Theme.space.sm
             , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-            , Border.color palette.border
-            , Background.color palette.surface
+            , Border.color colors.border
+            , Background.color colors.surface
             ]
             [ promptRow
             , el [ width fill ] button
@@ -226,26 +256,34 @@ inputRow viewport { command, output, onRun } =
             , paddingXY (replPadding viewport) (Theme.space.sm + 2)
             , spacing Theme.space.sm
             , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
-            , Border.color palette.border
-            , Background.color palette.surface
+            , Border.color colors.border
+            , Background.color colors.surface
             ]
-            [ promptGlyph, commandCell, button ]
+            [ promptGlyph themeMode, commandCell, button ]
 
 
-promptGlyph : Element msg
-promptGlyph =
+promptGlyph : Theme.Mode -> Element msg
+promptGlyph themeMode =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
         [ Font.family [ Theme.fontMono, Font.monospace ]
         , Font.size type_.codeSize
-        , Font.color (rgb255 0x27 0x6D 0xC3)
+        , Font.color colors.primary
         , Font.semiBold
         , centerY
         ]
         (text ">")
 
 
-commandLine : Viewport.Viewport -> String -> Element msg
-commandLine viewport command =
+commandLine : Theme.Mode -> Viewport.Viewport -> String -> Element msg
+commandLine themeMode viewport command =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
         [ Font.family [ Theme.fontMono, Font.monospace ]
         , Font.size
@@ -255,7 +293,7 @@ commandLine viewport command =
              else
                 type_.codeSize
             )
-        , Font.color palette.textPrimary
+        , Font.color colors.textPrimary
         , htmlAttribute (Html.Attributes.style "white-space" "pre")
         , centerY
         ]
@@ -311,23 +349,27 @@ stripCloseParen s =
 
 
 runButton :
-    { isRunning : Bool
+    { themeMode : Theme.Mode
+    , isRunning : Bool
     , onRun : msg
     , compact : Bool
     }
     -> Element msg
-runButton { isRunning, onRun, compact } =
+runButton { themeMode, isRunning, onRun, compact } =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         label =
             Element.html
                 (Html.span
                     [ Html.Attributes.class "repl-run-label" ]
-                    [ playGlyphHtml, Html.text "Run" ]
+                    [ playGlyphHtml, Html.text "Preview R" ]
                 )
 
         baseAttrs =
-            [ Background.color runGreen
-            , Font.color palette.textOnPrimary
+            [ Background.color (runGreen themeMode)
+            , Font.color colors.textOnPrimary
             , Font.size type_.smallSize
             , Font.medium
             , Border.rounded Theme.radius.sm
@@ -338,15 +380,15 @@ runButton { isRunning, onRun, compact } =
                  else
                     Theme.space.xs + 2
                 )
-            , Element.mouseOver [ Background.color runGreenHover ]
+            , Element.mouseOver [ Background.color (runGreenHover themeMode) ]
             , htmlAttribute (Html.Attributes.class "repl-run")
             , htmlAttribute
                 (Html.Attributes.attribute "aria-label"
                     (if isRunning then
-                        "Compiling, please wait"
+                        "Loading preview, please wait"
 
                      else
-                        "Run quone::compile"
+                        "Preview generated R output"
                     )
                 )
             , htmlAttribute
@@ -390,16 +432,19 @@ playGlyphHtml =
         [ Html.text "\u{25B6}" ]
 
 
-outputArea : Viewport.Viewport -> Output -> Element msg
-outputArea viewport output =
+outputArea : Theme.Mode -> Viewport.Viewport -> Output -> Element msg
+outputArea themeMode viewport output =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         pad =
             replPadding viewport
 
         baseAttrs =
             [ width fill
             , paddingXY pad (Theme.space.md - 2)
-            , Background.color reSurface
+            , Background.color (reSurface themeMode)
             , Font.family [ Theme.fontMono, Font.monospace ]
             , Font.size
                 (if Viewport.isHandset viewport then
@@ -408,7 +453,7 @@ outputArea viewport output =
                  else
                     type_.codeSize
                 )
-            , Font.color palette.textPrimary
+            , Font.color colors.textPrimary
             , spacing 6
             , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
             , htmlAttribute (Html.Attributes.style "min-width" "0")
@@ -417,40 +462,48 @@ outputArea viewport output =
     case output of
         Idle ->
             column baseAttrs
-                [ idleHint ]
+                [ idleHint themeMode ]
 
         Compiling ->
             column baseAttrs
-                [ compilingLine ]
+                [ compilingLine themeMode ]
 
         Compiled rSource ->
             column baseAttrs
-                [ compiledBlock viewport rSource ]
+                [ compiledBlock themeMode viewport rSource ]
 
 
-idleHint : Element msg
-idleHint =
+idleHint : Theme.Mode -> Element msg
+idleHint themeMode =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
-        [ Font.color palette.textMuted
+        [ Font.color colors.textMuted
         , Font.italic
         , htmlAttribute (Html.Attributes.class "repl-hint")
         ]
-        (text "# Click Run to compile to R")
+        (text "# Click Preview to show generated R")
 
 
-compilingLine : Element msg
-compilingLine =
+compilingLine : Theme.Mode -> Element msg
+compilingLine themeMode =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
         [ htmlAttribute (Html.Attributes.class "repl-compiling")
-        , Font.color palette.textSecondary
+        , Font.color colors.textSecondary
         , htmlAttribute (Html.Attributes.style "white-space" "pre")
         ]
         (Element.html
             (Html.span
                 [ Html.Attributes.attribute "role" "status"
-                , Html.Attributes.attribute "aria-label" "Compiling Quone"
+                , Html.Attributes.attribute "aria-label" "Loading preview"
                 ]
-                [ Html.text "Compiling Quone"
+                [ Html.text "Loading preview"
                 , Html.span [ Html.Attributes.class "repl-dot repl-dot-1" ] [ Html.text "." ]
                 , Html.span [ Html.Attributes.class "repl-dot repl-dot-2" ] [ Html.text "." ]
                 , Html.span [ Html.Attributes.class "repl-dot repl-dot-3" ] [ Html.text "." ]
@@ -459,14 +512,14 @@ compilingLine =
         )
 
 
-compiledBlock : Viewport.Viewport -> String -> Element msg
-compiledBlock viewport rSource =
+compiledBlock : Theme.Mode -> Viewport.Viewport -> String -> Element msg
+compiledBlock themeMode viewport rSource =
     el
         [ width fill
         , htmlAttribute (Html.Attributes.class "repl-output")
         , paddingEach { top = 6, right = 0, bottom = 4, left = 0 }
         ]
-        (CodeBlock.viewBare viewport CodeBlock.R rSource)
+        (CodeBlock.viewBare themeMode viewport CodeBlock.R rSource)
 
 
 replPadding : Viewport.Viewport -> Int

@@ -1,0 +1,24 @@
+{
+  "name": "quone-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Marketing site for Quone, a typed functional language that compiles to readable R.",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  },
+  "scripts": {
+    "build": "bash build.sh",
+    "serve:dist": "node scripts/serve-dist.cjs",
+    "test": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quone-lang/website.git"
+  },
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/quone-lang/website/issues"
+  },
+  "homepage": "https://github.com/quone-lang/website#readme"
+}

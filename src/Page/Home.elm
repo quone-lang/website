@@ -31,7 +31,6 @@ import Element
         , height
         , htmlAttribute
         , maximum
-        , minimum
         , padding
         , paddingEach
         , paragraph
@@ -48,13 +47,14 @@ import Element.Region as Region
 import Html
 import Html.Attributes
 import Html.Events
+import Json.Decode as Decode
 import Process
 import Task
 import Ui.Button as Button
 import Ui.CodeBlock as CodeBlock
 import Ui.Layout as Layout
 import Ui.Repl as Repl
-import Ui.Theme as Theme exposing (palette, type_)
+import Ui.Theme as Theme exposing (type_)
 import Ui.Viewport as Viewport
 
 
@@ -85,13 +85,16 @@ updateHero : Msg -> HeroState -> ( HeroState, Cmd Msg )
 updateHero msg state =
     case msg of
         SelectSnippet idx ->
-            if idx == state.snippetIndex then
-                ( state, Cmd.none )
+            ( setSnippet idx state, Cmd.none )
 
-            else
-                ( { state | snippetIndex = idx, compileState = HeroIdle }
-                , Cmd.none
-                )
+        MoveSnippet delta ->
+            ( setSnippet (state.snippetIndex + delta) state, Cmd.none )
+
+        SelectFirstSnippet ->
+            ( setSnippet 0 state, Cmd.none )
+
+        SelectLastSnippet ->
+            ( setSnippet (heroSnippetCount - 1) state, Cmd.none )
 
         RunHeroCompile ->
             if state.compileState == HeroCompiling then
@@ -121,17 +124,20 @@ heroCompileDelayMs =
 
 type Msg
     = SelectSnippet Int
+    | MoveSnippet Int
+    | SelectFirstSnippet
+    | SelectLastSnippet
     | RunHeroCompile
     | HeroCompileFinished Int
 
 
-view : Viewport.Viewport -> HeroState -> Element Msg
-view viewport heroState =
+view : Theme.Mode -> Viewport.Viewport -> HeroState -> Element Msg
+view themeMode viewport heroState =
     column
         [ width fill, spacing (sectionSpacing viewport) ]
-        [ heroSection viewport heroState
-        , featuresSection viewport
-        , closingSection viewport
+        [ heroSection themeMode viewport heroState
+        , featuresSection themeMode viewport
+        , closingSection themeMode viewport
         ]
 
 
@@ -139,9 +145,9 @@ view viewport heroState =
 -- HERO
 
 
-heroSection : Viewport.Viewport -> HeroState -> Element Msg
-heroSection viewport heroState =
-    Layout.wideSection viewport
+heroSection : Theme.Mode -> Viewport.Viewport -> HeroState -> Element Msg
+heroSection themeMode viewport heroState =
+    Layout.wideSection themeMode viewport
         { body =
             column
                 [ width fill
@@ -154,18 +160,21 @@ heroSection viewport heroState =
                         Theme.space.xl
                     )
                 ]
-                [ heroText viewport
-                , heroCode viewport heroState
+                [ heroText themeMode viewport
+                , heroCode themeMode viewport heroState
                 ]
         }
 
 
-heroText : Viewport.Viewport -> Element msg_
-heroText viewport =
+heroText : Theme.Mode -> Viewport.Viewport -> Element msg_
+heroText themeMode viewport =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         actions =
-            [ Button.linkPrimary { url = "/install", label = "Install the R package" }
-            , Button.linkSecondary { url = "https://github.com/quone-lang", label = "View on GitHub" }
+            [ Button.linkPrimary themeMode { url = "/install", label = "Install the R package" }
+            , Button.linkSecondary themeMode { url = "https://github.com/quone-lang", label = "View on GitHub" }
             ]
     in
     column
@@ -173,11 +182,11 @@ heroText viewport =
         , spacing Theme.space.lg
         , width (fill |> maximum 920)
         ]
-        [ kicker "v0.0.1 WIP"
+        [ kicker themeMode "v0.0.1 WIP"
         , paragraph
             [ Font.size (heroDisplaySize viewport)
             , Font.semiBold
-            , Font.color palette.textPrimary
+            , Font.color colors.textPrimary
             , Font.center
             , Element.spacing 8
             , Region.heading 1
@@ -193,7 +202,7 @@ heroText viewport =
                  else
                     type_.bodyLargeSize
                 )
-            , Font.color palette.textSecondary
+            , Font.color colors.textSecondary
             , Font.center
             , Element.spacing 6
             , width (fill |> maximum 720)
@@ -235,11 +244,17 @@ heroSwapToken =
         )
 
 
-heroCode : Viewport.Viewport -> HeroState -> Element Msg
-heroCode viewport heroState =
+heroCode : Theme.Mode -> Viewport.Viewport -> HeroState -> Element Msg
+heroCode themeMode viewport heroState =
     let
         snippet =
             activeSnippet heroState
+
+        selectedTabId =
+            snippetTabId heroState.snippetIndex
+
+        selectedPanelId =
+            snippetPanelId heroState.snippetIndex
 
         replOutput =
             case heroState.compileState of
@@ -255,18 +270,29 @@ heroCode viewport heroState =
     column
         [ width (fill |> maximum 760)
         , centerX
-        , spacing (replGap viewport)
+        , spacing 0
         , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
         ]
-        [ column [ width fill, spacing (tabGap viewport) ]
-            [ snippetTabs viewport heroState
-            , CodeBlock.view viewport CodeBlock.Quone snippet.quone
+        [ snippetTabs viewport heroState
+        , el
+            [ width fill
+            , paddingEach { top = tabGap viewport, right = 0, bottom = 0, left = 0 }
             ]
-        , Repl.view viewport
-            { command = "quone::compile(\"" ++ snippet.filename ++ "\")"
-            , output = replOutput
-            , onRun = RunHeroCompile
-            }
+            (column
+                [ width fill
+                , spacing (replGap viewport)
+                , htmlAttribute (Html.Attributes.id selectedPanelId)
+                , htmlAttribute (Html.Attributes.attribute "role" "tabpanel")
+                , htmlAttribute (Html.Attributes.attribute "aria-labelledby" selectedTabId)
+                ]
+                [ CodeBlock.view themeMode viewport CodeBlock.Quone snippet.quone
+                , Repl.view themeMode viewport
+                    { command = "quone::compile(\"" ++ snippet.filename ++ "\")"
+                    , output = replOutput
+                    , onRun = RunHeroCompile
+                    }
+                ]
+            )
         ]
 
 
@@ -291,6 +317,7 @@ snippetTabs _ heroState =
             [ Html.Attributes.class "snippet-tabs"
             , Html.Attributes.attribute "role" "tablist"
             , Html.Attributes.attribute "aria-label" "Quone snippets"
+            , Html.Attributes.attribute "aria-orientation" "horizontal"
             ]
             (List.map (snippetTabHtml heroState.snippetIndex) indexed)
         )
@@ -302,6 +329,12 @@ snippetTabHtml activeIdx ( idx, snippet ) =
         isActive =
             idx == activeIdx
 
+        tabId =
+            snippetTabId idx
+
+        panelId =
+            snippetPanelId idx
+
         cls =
             if isActive then
                 "snippet-tab snippet-tab-active"
@@ -311,8 +344,10 @@ snippetTabHtml activeIdx ( idx, snippet ) =
     in
     Html.button
         [ Html.Attributes.class cls
+        , Html.Attributes.id tabId
         , Html.Attributes.type_ "button"
         , Html.Attributes.attribute "role" "tab"
+        , Html.Attributes.attribute "aria-controls" panelId
         , Html.Attributes.attribute "aria-selected"
             (if isActive then
                 "true"
@@ -320,9 +355,74 @@ snippetTabHtml activeIdx ( idx, snippet ) =
              else
                 "false"
             )
+        , Html.Attributes.tabindex
+            (if isActive then
+                0
+
+             else
+                -1
+            )
+        , snippetTabKeyHandler
         , Html.Events.onClick (SelectSnippet idx)
         ]
         [ Html.text snippet.filename ]
+
+
+snippetTabKeyHandler : Html.Attribute Msg
+snippetTabKeyHandler =
+    Html.Events.preventDefaultOn "keydown"
+        (Decode.field "key" Decode.string
+            |> Decode.andThen
+                (\key ->
+                    case key of
+                        "ArrowLeft" ->
+                            Decode.succeed ( MoveSnippet -1, True )
+
+                        "ArrowRight" ->
+                            Decode.succeed ( MoveSnippet 1, True )
+
+                        "Home" ->
+                            Decode.succeed ( SelectFirstSnippet, True )
+
+                        "End" ->
+                            Decode.succeed ( SelectLastSnippet, True )
+
+                        _ ->
+                            Decode.fail "Unhandled tab key"
+                )
+        )
+
+
+snippetTabId : Int -> String
+snippetTabId idx =
+    "hero-snippet-tab-" ++ String.fromInt idx
+
+
+snippetPanelId : Int -> String
+snippetPanelId idx =
+    "hero-snippet-panel-" ++ String.fromInt idx
+
+
+heroSnippetCount : Int
+heroSnippetCount =
+    List.length Examples.heroSnippets
+
+
+setSnippet : Int -> HeroState -> HeroState
+setSnippet idx state =
+    let
+        nextIdx =
+            if heroSnippetCount < 1 then
+                0
+
+            else
+                modBy heroSnippetCount idx
+    in
+    if nextIdx == state.snippetIndex then
+        state
+
+    else
+        { state | snippetIndex = nextIdx, compileState = HeroIdle }
 
 
 replGap : Viewport.Viewport -> Int
@@ -347,9 +447,9 @@ tabGap viewport =
 -- FEATURES
 
 
-featuresSection : Viewport.Viewport -> Element msg_
-featuresSection viewport =
-    Layout.section viewport
+featuresSection : Theme.Mode -> Viewport.Viewport -> Element msg_
+featuresSection themeMode viewport =
+    Layout.section themeMode viewport
         { kicker = Just "Why Quone"
         , title = Just "Compiler help without giving up R."
         , body =
@@ -357,23 +457,26 @@ featuresSection viewport =
                 [ width fill
                 , spacing Theme.space.lg
                 ]
-                (List.map featureCard Pitch.features)
+                (List.map (featureCard themeMode) Pitch.features)
         }
 
 
-featureCard : Pitch.Feature -> Element msg_
-featureCard f =
+featureCard : Theme.Mode -> Pitch.Feature -> Element msg_
+featureCard themeMode f =
     let
+        colors =
+            Theme.paletteFor themeMode
+
         ( badgeBackground, badgeColor ) =
-            accentColors f.accent
+            accentColors themeMode f.accent
     in
     column
         [ width (Element.fill |> Element.minimum 280 |> Element.maximum 360)
         , height fill
-        , Background.color palette.surface
+        , Background.color colors.surface
         , Border.rounded Theme.radius.lg
         , Border.width 1
-        , Border.color palette.border
+        , Border.color colors.border
         , padding Theme.space.lg
         , spacing Theme.space.md
         , alignTop
@@ -382,12 +485,12 @@ featureCard f =
         , paragraph
             [ Font.size type_.h3Size
             , Font.semiBold
-            , Font.color palette.textPrimary
+            , Font.color colors.textPrimary
             ]
             [ text f.title ]
         , paragraph
             [ Font.size type_.bodySize
-            , Font.color palette.textSecondary
+            , Font.color colors.textSecondary
             , Element.spacing 6
             ]
             [ text f.body ]
@@ -410,31 +513,35 @@ featureBadge { background, color, glyph } =
         (el [ centerX, Element.centerY ] (text glyph))
 
 
-accentColors : Pitch.Accent -> ( Element.Color, Element.Color )
-accentColors accent =
+accentColors : Theme.Mode -> Pitch.Accent -> ( Element.Color, Element.Color )
+accentColors themeMode accent =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     case accent of
         Pitch.AccentPrimary ->
-            ( Element.rgba255 0x27 0x6D 0xC3 0.10, palette.primaryDark )
+            ( Element.rgba255 0x27 0x6D 0xC3 (if Theme.isDark themeMode then 0.18 else 0.10), colors.primaryDark )
 
         Pitch.AccentSecondary ->
-            ( Element.rgba255 0xE0 0x60 0x4C 0.12, palette.secondary )
+            ( Element.rgba255 0xE0 0x60 0x4C (if Theme.isDark themeMode then 0.18 else 0.12), colors.secondary )
 
         Pitch.AccentNeutral ->
-            ( palette.codeSurface, palette.textPrimary )
+            ( colors.codeSurface, colors.textPrimary )
 
 
 
 -- CLOSING
 
 
-closingSection : Viewport.Viewport -> Element msg_
-closingSection viewport =
+closingSection : Theme.Mode -> Viewport.Viewport -> Element msg_
+closingSection themeMode viewport =
     let
         primaryAction =
-            Button.linkPrimary { url = "/install", label = "Install the R package" }
+            Button.linkPrimary themeMode { url = "/install", label = "Install the R package" }
 
         secondaryAction =
-            Button.linkSecondary
+            Button.linkSecondary themeMode
                 { url = "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
                 , label = "Language reference"
                 }
@@ -460,7 +567,7 @@ closingSection viewport =
                     , secondaryAction
                     ]
     in
-    Layout.section viewport
+    Layout.section themeMode viewport
         { kicker = Just "Status"
         , title = Just "Early, useful, and still small enough to learn fast."
         , body =
@@ -469,27 +576,35 @@ closingSection viewport =
                 , centerX
                 , spacing Theme.space.lg
                 ]
-                (List.map prose Pitch.whyQuone ++ [ actionRow ])
+                (List.map (prose themeMode) Pitch.whyQuone ++ [ actionRow ])
         }
 
 
-prose : String -> Element msg_
-prose s =
+prose : Theme.Mode -> String -> Element msg_
+prose themeMode s =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     paragraph
         [ Font.size type_.bodyLargeSize
-        , Font.color palette.textSecondary
+        , Font.color colors.textSecondary
         , Font.center
         , Element.spacing 6
         ]
         [ text s ]
 
 
-kicker : String -> Element msg_
-kicker s =
+kicker : Theme.Mode -> String -> Element msg_
+kicker themeMode s =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
     el
         [ centerX
         , Font.size type_.smallSize
-        , Font.color palette.primary
+        , Font.color colors.primary
         , Font.semiBold
         , Font.letterSpacing 1.4
         ]
