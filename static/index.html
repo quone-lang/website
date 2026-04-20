@@ -70,6 +70,12 @@
         --tab-active-text: #1a1a1a;
         --tab-active-border: #276dc3;
         --tab-focus: #276dc3;
+        --copy-button-bg: rgba(39, 109, 195, 0.06);
+        --copy-button-hover-bg: rgba(39, 109, 195, 0.12);
+        --copy-button-border: rgba(39, 109, 195, 0.18);
+        --copy-button-text: #1a4f8b;
+        --copy-button-copied-bg: #276dc3;
+        --copy-button-copied-text: #ffffff;
       }
 
       @media (prefers-color-scheme: dark) {
@@ -94,6 +100,12 @@
           --tab-active-text: #f2f5f8;
           --tab-active-border: #98c6ff;
           --tab-focus: #98c6ff;
+          --copy-button-bg: rgba(55, 126, 214, 0.14);
+          --copy-button-hover-bg: rgba(55, 126, 214, 0.22);
+          --copy-button-border: rgba(152, 198, 255, 0.24);
+          --copy-button-text: #98c6ff;
+          --copy-button-copied-bg: #377ed6;
+          --copy-button-copied-text: #ffffff;
         }
       }
 
@@ -118,6 +130,12 @@
         --tab-active-text: #1a1a1a;
         --tab-active-border: #276dc3;
         --tab-focus: #276dc3;
+        --copy-button-bg: rgba(39, 109, 195, 0.06);
+        --copy-button-hover-bg: rgba(39, 109, 195, 0.12);
+        --copy-button-border: rgba(39, 109, 195, 0.18);
+        --copy-button-text: #1a4f8b;
+        --copy-button-copied-bg: #276dc3;
+        --copy-button-copied-text: #ffffff;
       }
 
       :root[data-theme="dark"] {
@@ -141,6 +159,12 @@
         --tab-active-text: #f2f5f8;
         --tab-active-border: #98c6ff;
         --tab-focus: #98c6ff;
+        --copy-button-bg: rgba(55, 126, 214, 0.14);
+        --copy-button-hover-bg: rgba(55, 126, 214, 0.22);
+        --copy-button-border: rgba(152, 198, 255, 0.24);
+        --copy-button-text: #98c6ff;
+        --copy-button-copied-bg: #377ed6;
+        --copy-button-copied-text: #ffffff;
       }
 
       html, body {
@@ -307,6 +331,44 @@
         border-radius: 2px;
       }
 
+      .code-block-pre {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .code-copy-button {
+        appearance: none;
+        border: 1px solid var(--copy-button-border);
+        background: var(--copy-button-bg);
+        color: var(--copy-button-text);
+        border-radius: 999px;
+        padding: 5px 10px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1;
+        cursor: pointer;
+        transition:
+          background-color 140ms ease,
+          border-color 140ms ease,
+          color 140ms ease,
+          transform 80ms ease;
+      }
+      .code-copy-button:hover {
+        background: var(--copy-button-hover-bg);
+      }
+      .code-copy-button:active {
+        transform: scale(0.97);
+      }
+      .code-copy-button:focus-visible {
+        outline: 2px solid var(--tab-focus);
+        outline-offset: 2px;
+      }
+      .code-copy-button[data-copy-state="copied"] {
+        background: var(--copy-button-copied-bg);
+        border-color: var(--copy-button-copied-bg);
+        color: var(--copy-button-copied-text);
+      }
+
       @media (max-width: 640px) {
         .snippet-tabs {
           gap: 2px;
@@ -392,6 +454,87 @@
         }
 
         applyThemePreference(themePreference);
+      })();
+    </script>
+    <script>
+      (function () {
+        var resetTimers = new WeakMap();
+
+        function setButtonLabel(button, label, state) {
+          button.textContent = label;
+
+          if (state) {
+            button.setAttribute("data-copy-state", state);
+          } else {
+            button.removeAttribute("data-copy-state");
+          }
+        }
+
+        function resetCopiedState(button) {
+          var existing = resetTimers.get(button);
+          if (existing) {
+            window.clearTimeout(existing);
+          }
+
+          var timer = window.setTimeout(function () {
+            setButtonLabel(button, "Copy", null);
+            resetTimers.delete(button);
+          }, 1800);
+
+          resetTimers.set(button, timer);
+        }
+
+        function fallbackCopy(text) {
+          var textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.top = "-9999px";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
+
+          try {
+            return document.execCommand("copy");
+          } finally {
+            document.body.removeChild(textarea);
+          }
+        }
+
+        async function copyText(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+
+          return fallbackCopy(text);
+        }
+
+        document.addEventListener("click", function (event) {
+          var button = event.target.closest(".code-copy-button[data-copy-text]");
+          if (!button) return;
+
+          event.preventDefault();
+
+          var text = button.getAttribute("data-copy-text");
+          if (!text) return;
+
+          setButtonLabel(button, "Copying...", null);
+
+          copyText(text)
+            .then(function (copied) {
+              if (!copied) {
+                throw new Error("Copy command was rejected");
+              }
+
+              setButtonLabel(button, "Copied", "copied");
+              resetCopiedState(button);
+            })
+            .catch(function () {
+              setButtonLabel(button, "Copy failed", null);
+              resetCopiedState(button);
+            });
+        });
       })();
     </script>
   </body>

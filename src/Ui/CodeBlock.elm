@@ -19,12 +19,15 @@ Elm. R highlighting follows the same shape, with R-specific tokens
 import Element
     exposing
         ( Element
+        , alignRight
         , alignTop
+        , centerY
         , clip
         , column
         , el
         , fill
         , height
+        , html
         , htmlAttribute
         , paddingXY
         , row
@@ -38,6 +41,7 @@ import Element
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Html
 import Html.Attributes
 import Set exposing (Set)
 import Ui.Theme as Theme exposing (type_)
@@ -72,7 +76,7 @@ view themeMode viewport lang source =
         , Border.color colors.border
         , spacing 0
         ]
-        [ languageBadge themeMode lang
+        [ languageBadge themeMode lang source
         , block themeMode viewport lang source
         ]
 
@@ -171,43 +175,54 @@ viewInline themeMode s =
 -- INTERNALS
 
 
-languageBadge : Theme.Mode -> Language -> Element msg
-languageBadge themeMode lang =
+languageBadge : Theme.Mode -> Language -> String -> Element msg
+languageBadge themeMode lang source =
     let
         colors =
             Theme.paletteFor themeMode
 
         label =
-            case lang of
-                Quone ->
-                    "quone"
-
-                R ->
-                    "R"
+            languageLabel lang
     in
-    el
+    row
         [ Font.family [ Theme.fontMono, Font.monospace ]
         , Font.size type_.codeSmallSize
-        , Font.color colors.textMuted
         , paddingXY Theme.space.md Theme.space.sm
         , Border.widthEach { top = 0, right = 0, bottom = 1, left = 0 }
         , Border.color colors.border
         , width fill
+        , centerY
         ]
-        (text label)
+        [ el [ Font.color colors.textMuted ] (text label)
+        , el [ alignRight ] (copyButton lang source)
+        ]
+
+
+languageLabel : Language -> String
+languageLabel lang =
+    case lang of
+        Quone ->
+            "quone"
+
+        R ->
+            "R"
+
+
+copyButton : Language -> String -> Element msg
+copyButton lang source =
+    html
+        (Html.button
+            [ Html.Attributes.class "code-copy-button"
+            , Html.Attributes.type_ "button"
+            , Html.Attributes.attribute "aria-label" ("Copy " ++ languageLabel lang ++ " code")
+            , Html.Attributes.attribute "data-copy-text" source
+            ]
+            [ Html.text "Copy" ]
+        )
 
 
 block : Theme.Mode -> Viewport.Viewport -> Language -> String -> Element msg
 block themeMode viewport lang source =
-    let
-        colors =
-            Theme.paletteFor themeMode
-
-        renderedLines =
-            source
-                |> String.lines
-                |> List.map (renderLine themeMode lang)
-    in
     el
         [ width fill
         , clip
@@ -216,37 +231,161 @@ block themeMode viewport lang source =
         , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
         , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
         ]
-        (column
-            [ Font.family [ Theme.fontMono, Font.monospace ]
-            , Font.size
-                (if Viewport.isHandset viewport then
-                    type_.codeSmallSize
+        (html (blockHtml themeMode viewport lang source))
 
-                 else
-                    type_.codeSize
-                )
-            , Font.color colors.codePlain
-            , paddingXY
-                (if Viewport.isHandset viewport then
-                    Theme.space.md
 
-                 else
-                    Theme.space.lg
-                )
-                (if Viewport.isHandset viewport then
-                    Theme.space.md
+blockHtml : Theme.Mode -> Viewport.Viewport -> Language -> String -> Html.Html msg
+blockHtml themeMode viewport lang source =
+    Html.pre
+        [ Html.Attributes.class "code-block-pre"
+        , Html.Attributes.style "margin" "0"
+        , Html.Attributes.style "padding"
+            (String.fromInt (codePaddingY viewport)
+                ++ "px "
+                ++ String.fromInt (codePaddingX viewport)
+                ++ "px"
+            )
+        , Html.Attributes.style "font-family" "\"JetBrains Mono\", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        , Html.Attributes.style "font-size" (String.fromInt (codeFontSize viewport) ++ "px")
+        , Html.Attributes.style "line-height" "1.55"
+        , Html.Attributes.style "color" (plainColor themeMode)
+        , Html.Attributes.style "white-space" "pre"
+        ]
+        [ Html.code [] (htmlCodeLines themeMode lang source) ]
 
-                 else
-                    Theme.space.lg
-                )
-            , spacing 4
-            , width fill
-            , height shrink
-            , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
-            , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
-            ]
-            renderedLines
-        )
+
+codePaddingX : Viewport.Viewport -> Int
+codePaddingX viewport =
+    if Viewport.isHandset viewport then
+        Theme.space.md
+
+    else
+        Theme.space.lg
+
+
+codePaddingY : Viewport.Viewport -> Int
+codePaddingY =
+    codePaddingX
+
+
+codeFontSize : Viewport.Viewport -> Int
+codeFontSize viewport =
+    if Viewport.isHandset viewport then
+        type_.codeSmallSize
+
+    else
+        type_.codeSize
+
+
+htmlCodeLines : Theme.Mode -> Language -> String -> List (Html.Html msg)
+htmlCodeLines themeMode lang source =
+    source
+        |> String.lines
+        |> List.map (renderHtmlLine themeMode lang)
+        |> intersperseHtml (Html.text "\n")
+
+
+intersperseHtml : Html.Html msg -> List (Html.Html msg) -> List (Html.Html msg)
+intersperseHtml separator items =
+    case items of
+        [] ->
+            []
+
+        first :: rest ->
+            first
+                :: List.concatMap (\item -> [ separator, item ]) rest
+
+
+renderHtmlLine : Theme.Mode -> Language -> String -> Html.Html msg
+renderHtmlLine themeMode lang line =
+    Html.span [] (tokenise lang line |> List.map (renderHtmlToken themeMode))
+
+
+renderHtmlToken : Theme.Mode -> Token -> Html.Html msg
+renderHtmlToken themeMode token =
+    case token of
+        Plain s ->
+            Html.text s
+
+        Keyword s ->
+            styledToken "code-token-keyword" (tokenColor themeMode token) [ Html.text s ]
+
+        TypeName s ->
+            styledToken "code-token-type" (tokenColor themeMode token) [ Html.text s ]
+
+        StringLit s ->
+            styledToken "code-token-string" (tokenColor themeMode token) [ Html.text s ]
+
+        NumberLit s ->
+            styledToken "code-token-number" (tokenColor themeMode token) [ Html.text s ]
+
+        Comment s ->
+            styledToken "code-token-comment" (tokenColor themeMode token) [ Html.text s ]
+
+        Operator s ->
+            styledToken "code-token-operator" (tokenColor themeMode token) [ Html.text s ]
+
+
+styledToken : String -> String -> List (Html.Html msg) -> Html.Html msg
+styledToken cls color children =
+    Html.span
+        [ Html.Attributes.class cls
+        , Html.Attributes.style "color" color
+        ]
+        children
+
+
+plainColor : Theme.Mode -> String
+plainColor themeMode =
+    case themeMode of
+        Theme.Light ->
+            "#1a1a1a"
+
+        Theme.Dark ->
+            "#f2f5f8"
+
+
+tokenColor : Theme.Mode -> Token -> String
+tokenColor themeMode token =
+    case ( themeMode, token ) of
+        ( Theme.Light, Keyword _ ) ->
+            "#b03a28"
+
+        ( Theme.Light, TypeName _ ) ->
+            "#0d9488"
+
+        ( Theme.Light, StringLit _ ) ->
+            "#a16207"
+
+        ( Theme.Light, NumberLit _ ) ->
+            "#6d28d9"
+
+        ( Theme.Light, Comment _ ) ->
+            "#8a8a8a"
+
+        ( Theme.Light, Operator _ ) ->
+            "#b03a28"
+
+        ( Theme.Dark, Keyword _ ) ->
+            "#ff907a"
+
+        ( Theme.Dark, TypeName _ ) ->
+            "#54d1c8"
+
+        ( Theme.Dark, StringLit _ ) ->
+            "#e8b763"
+
+        ( Theme.Dark, NumberLit _ ) ->
+            "#bc9cff"
+
+        ( Theme.Dark, Comment _ ) ->
+            "#8d97a7"
+
+        ( Theme.Dark, Operator _ ) ->
+            "#ff907a"
+
+        _ ->
+            plainColor themeMode
 
 
 renderLine : Theme.Mode -> Language -> String -> Element msg

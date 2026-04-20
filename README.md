@@ -14,6 +14,17 @@ For the canonical production-style build, you need Node/npm and Python 3.
 `build.sh` installs Elm 0.19.1 for the build itself, compiles the site,
 and fingerprints the resulting bundle as `elm-<hash>.js`.
 
+For a live-reloading local workflow, use:
+
+```sh
+npm install
+npm run dev
+```
+
+That starts a watcher at `http://127.0.0.1:4174`. Changes under `src/`,
+`static/`, or `elm.json` trigger a rebuild, and the browser reloads after
+each successful rebuild.
+
 If you want to use `elm reactor` while editing `src/`, install Elm 0.19.1
 yourself (`brew install elm` on macOS, or follow the
 [Elm guide](https://guide.elm-lang.org/install/elm.html)).

@@ -1,6 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
-test("home page renders the hero preview shell", async ({ page }) => {
+test("home page renders the hero preview shell", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-write"], {
+    origin: "http://127.0.0.1:4173",
+  });
+
   await page.goto("/");
 
   await expect(
@@ -18,6 +22,11 @@ test("home page renders the hero preview shell", async ({ page }) => {
 
   const replBox = await repl.boundingBox();
   expect(replBox?.height ?? 0).toBeGreaterThan(120);
+
+  const copyButton = page.getByRole("button", { name: "Copy quone code" });
+  await expect(copyButton).toBeVisible();
+  await copyButton.click();
+  await expect(copyButton).toHaveText("Copied");
 
   await page.getByRole("button", { name: "Preview generated R output" }).click();
   await expect(page.getByText("normalize <- function(max_score, raw) {")).toBeVisible();
