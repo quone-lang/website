@@ -1,5 +1,6 @@
 module Page.Home exposing
     ( HeroCompileState
+    , HeroEntry
     , HeroState
     , Msg(..)
     , initHeroState
@@ -59,24 +60,49 @@ import Ui.Theme as Theme exposing (type_)
 import Ui.Viewport as Viewport
 
 
-{-| The hero REPL is keyed on which snippet is selected. Switching
-snippets resets the compile state so each tab starts at `HeroIdle`.
+{-| State for the hero REPL.
+
+Mirrors RStudio's pane: an accumulating list of past commands and
+their outcomes (the `history`, oldest first), the current in-flight
+state (`compileState`, only `HeroIdle` or `HeroCompiling`), and the
+text the user is currently typing on the live `>` prompt
+(`commandText`).
+
+Switching snippet tabs wipes the history, resets to `HeroIdle`, and
+pre-fills `commandText` with the new snippet's `quone::compile("…")`
+invocation -- effectively "starting a fresh R session focused on this
+file." Submitting a command clears `commandText` and appends the
+outcome to `history`, so successive runs stack up like a real console.
 -}
 type alias HeroState =
     { snippetIndex : Int
+    , commandText : String
+    , history : List HeroEntry
     , compileState : HeroCompileState
     }
 
 
+{-| One past command in the REPL scrollback. Successes carry the
+generated R; errors carry an R-flavoured error string. -}
+type HeroEntry
+    = HeroEntrySuccess { command : String, result : String }
+    | HeroEntryError { command : String, message : String }
+
+
 type HeroCompileState
     = HeroIdle
-    | HeroCompiling
-    | HeroCompiled
+    | HeroCompiling { command : String, snippetIndex : Int }
 
 
 initHeroState : HeroState
 initHeroState =
-    { snippetIndex = 0
+    let
+        idx =
+            0
+    in
+    { snippetIndex = idx
+    , commandText = compileCommandFor (snippetAt idx)
+    , history = []
     , compileState = HeroIdle
     }
 
@@ -97,22 +123,187 @@ updateHero msg state =
         SelectLastSnippet ->
             ( setSnippet (heroSnippetCount - 1) state, Cmd.none )
 
-        RunHeroCompile ->
-            if state.compileState == HeroCompiling then
-                ( state, Cmd.none )
+        SetHeroCommand newText ->
+            ( { state | commandText = newText }, Cmd.none )
+
+        SubmitHeroCommand ->
+            submitCommand state
+
+        HeroCompileFinished submittedCommand ->
+            ( finishCompile submittedCommand state, Cmd.none )
+
+
+submitCommand : HeroState -> ( HeroState, Cmd Msg )
+submitCommand state =
+    if isCompiling state.compileState then
+        ( state, Cmd.none )
+
+    else
+        let
+            trimmed =
+                String.trim state.commandText
+        in
+        if String.isEmpty trimmed then
+            ( state, Cmd.none )
+
+        else
+            case snippetIndexForCommand trimmed of
+                Just snippetIdx ->
+                    ( { state
+                        | commandText = ""
+                        , compileState =
+                            HeroCompiling
+                                { command = trimmed
+                                , snippetIndex = snippetIdx
+                                }
+                      }
+                    , Process.sleep heroCompileDelayMs
+                        |> Task.perform (\_ -> HeroCompileFinished trimmed)
+                    )
+
+                Nothing ->
+                    ( { state
+                        | commandText = ""
+                        , history =
+                            state.history
+                                ++ [ HeroEntryError
+                                        { command = trimmed
+                                        , message = demoOnlyError state
+                                        }
+                                   ]
+                      }
+                    , Cmd.none
+                    )
+
+
+{-| When a successful compile finishes we append a `HeroEntrySuccess`
+to the scrollback (so the result lives under the previous run, just
+like a real REPL) and return to `HeroIdle`. We do *not* touch
+`snippetIndex` or `commandText` -- the user stays on whatever snippet
+they were on, with an empty prompt ready for the next thing they want
+to type.
+-}
+finishCompile : String -> HeroState -> HeroState
+finishCompile submittedCommand state =
+    case state.compileState of
+        HeroCompiling pending ->
+            if pending.command == submittedCommand then
+                { state
+                    | compileState = HeroIdle
+                    , history =
+                        state.history
+                            ++ [ HeroEntrySuccess
+                                    { command = pending.command
+                                    , result = (snippetAt pending.snippetIndex).r
+                                    }
+                               ]
+                }
 
             else
-                ( { state | compileState = HeroCompiling }
-                , Process.sleep heroCompileDelayMs
-                    |> Task.perform (\_ -> HeroCompileFinished state.snippetIndex)
-                )
+                state
 
-        HeroCompileFinished idx ->
-            if idx == state.snippetIndex && state.compileState == HeroCompiling then
-                ( { state | compileState = HeroCompiled }, Cmd.none )
+        _ ->
+            state
 
-            else
-                ( state, Cmd.none )
+
+isCompiling : HeroCompileState -> Bool
+isCompiling compileState =
+    case compileState of
+        HeroCompiling _ ->
+            True
+
+        _ ->
+            False
+
+
+{-| The hero REPL is a demo, not a real R interpreter. The only
+thing it actually knows how to do is recognise the literal pattern
+`quone::compile("file.Q")` for one of the snippets in the tabs above
+and "compile" it (i.e. show the canned R the snippet ships with).
+
+We don't try to be clever about R syntax for anything else; every
+other input shape just produces the same friendly "demo only" error
+through `demoOnlyError`.
+-}
+snippetIndexForCommand : String -> Maybe Int
+snippetIndexForCommand input =
+    input
+        |> String.trim
+        |> stripPrefix "quone::compile"
+        |> Maybe.map String.trim
+        |> Maybe.andThen (stripPrefix "(")
+        |> Maybe.map String.trim
+        |> Maybe.andThen (stripSuffix ")")
+        |> Maybe.map String.trim
+        |> Maybe.andThen parseStringLiteral
+        |> Maybe.andThen snippetIndexByFilename
+
+
+parseStringLiteral : String -> Maybe String
+parseStringLiteral raw =
+    let
+        wrappedIn ch =
+            String.length raw >= 2
+                && String.startsWith ch raw
+                && String.endsWith ch raw
+    in
+    if wrappedIn "\"" || wrappedIn "'" then
+        Just (String.slice 1 (String.length raw - 1) raw)
+
+    else
+        Nothing
+
+
+stripPrefix : String -> String -> Maybe String
+stripPrefix prefix input =
+    if String.startsWith prefix input then
+        Just (String.dropLeft (String.length prefix) input)
+
+    else
+        Nothing
+
+
+stripSuffix : String -> String -> Maybe String
+stripSuffix suffix input =
+    if String.endsWith suffix input then
+        Just (String.dropRight (String.length suffix) input)
+
+    else
+        Nothing
+
+
+{-| The single error the demo emits for any input it doesn't know
+how to handle. We point the user at the active snippet so the hint
+is something they can actually try right now -- click and re-run.
+-}
+demoOnlyError : HeroState -> String
+demoOnlyError state =
+    "This is a demo, not a real R interpreter.\nTry: "
+        ++ compileCommandFor (snippetAt state.snippetIndex)
+
+
+snippetIndexByFilename : String -> Maybe Int
+snippetIndexByFilename filename =
+    Examples.heroSnippets
+        |> List.indexedMap Tuple.pair
+        |> List.filter (\( _, snippet ) -> snippet.filename == filename)
+        |> List.head
+        |> Maybe.map Tuple.first
+
+
+snippetAt : Int -> Examples.Snippet
+snippetAt idx =
+    case List.drop idx Examples.heroSnippets of
+        first :: _ ->
+            first
+
+        [] ->
+            Examples.normalizeSnippet
+
+
+compileCommandFor : Examples.Snippet -> String
+compileCommandFor snippet =
+    "quone::compile(\"" ++ snippet.filename ++ "\")"
 
 
 {-| Artificial delay so the spinner is visible long enough to register
@@ -128,8 +319,9 @@ type Msg
     | MoveSnippet Int
     | SelectFirstSnippet
     | SelectLastSnippet
-    | RunHeroCompile
-    | HeroCompileFinished Int
+    | SetHeroCommand String
+    | SubmitHeroCommand
+    | HeroCompileFinished String
 
 
 view : Theme.Mode -> Viewport.Viewport -> HeroState -> Element Msg
@@ -257,16 +449,19 @@ heroCode themeMode viewport heroState =
         selectedPanelId =
             snippetPanelId heroState.snippetIndex
 
-        replOutput =
+        replHistory =
+            List.map heroEntryToReplEntry heroState.history
+
+        ( replEntries, replIsCompiling ) =
             case heroState.compileState of
                 HeroIdle ->
-                    Repl.Idle
+                    ( replHistory, False )
 
-                HeroCompiling ->
-                    Repl.Compiling
-
-                HeroCompiled ->
-                    Repl.Compiled snippet.r
+                HeroCompiling { command } ->
+                    ( replHistory
+                        ++ [ Repl.EntryCompiling { command = command } ]
+                    , True
+                    )
     in
     column
         [ width (fill |> maximum 760)
@@ -294,9 +489,12 @@ heroCode themeMode viewport heroState =
                 ]
                 [ CodeBlock.view themeMode viewport CodeBlock.Quone snippet.quone
                 , Repl.view themeMode viewport
-                    { command = "quone::compile(\"" ++ snippet.filename ++ "\")"
-                    , output = replOutput
-                    , onRun = RunHeroCompile
+                    { entries = replEntries
+                    , isCompiling = replIsCompiling
+                    , value = heroState.commandText
+                    , onInput = SetHeroCommand
+                    , onSubmit = SubmitHeroCommand
+                    , inputId = "hero-repl-input"
                     }
                 ]
             )
@@ -305,12 +503,7 @@ heroCode themeMode viewport heroState =
 
 activeSnippet : HeroState -> Examples.Snippet
 activeSnippet heroState =
-    case List.drop heroState.snippetIndex Examples.heroSnippets of
-        first :: _ ->
-            first
-
-        [] ->
-            Examples.normalizeSnippet
+    snippetAt heroState.snippetIndex
 
 
 snippetTabs : Viewport.Viewport -> HeroState -> Element Msg
@@ -415,6 +608,25 @@ heroSnippetCount =
     List.length Examples.heroSnippets
 
 
+heroEntryToReplEntry : HeroEntry -> Repl.Entry
+heroEntryToReplEntry entry =
+    case entry of
+        HeroEntrySuccess { command, result } ->
+            Repl.EntrySuccess { command = command, result = result }
+
+        HeroEntryError { command, message } ->
+            Repl.EntryError { command = command, message = message }
+
+
+{-| Switch the snippet picker to `idx`. We treat this as "start a
+fresh R session focused on this file": wipe the scrollback, pre-fill
+the live prompt with `quone::compile("that_file.Q")`, and cancel any
+in-flight compile (its delayed `HeroCompileFinished` will arrive into
+`HeroIdle` and quietly no-op).
+
+Clicking the same tab the user is already on is a no-op, matching
+every tabbed UI ever.
+-}
 setSnippet : Int -> HeroState -> HeroState
 setSnippet idx state =
     let
@@ -429,7 +641,12 @@ setSnippet idx state =
         state
 
     else
-        { state | snippetIndex = nextIdx, compileState = HeroIdle }
+        { state
+            | snippetIndex = nextIdx
+            , commandText = compileCommandFor (snippetAt nextIdx)
+            , history = []
+            , compileState = HeroIdle
+        }
 
 
 replGap : Viewport.Viewport -> Int

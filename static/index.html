@@ -165,6 +165,9 @@
           0 1px 1px rgba(27, 34, 44, 0.04),
           0 6px 18px rgba(27, 34, 44, 0.08),
           0 18px 36px rgba(27, 34, 44, 0.04);
+        --repl-caret-color: #1a1a1a;
+        --repl-input-color: #1f2933;
+        --repl-selection-bg: rgba(39, 109, 195, 0.22);
         --tok-pkg: #0d9488;
         --tok-op: #b03a28;
         --tok-fn: #6d28d9;
@@ -195,6 +198,9 @@
             0 1px 1px rgba(0, 0, 0, 0.28),
             0 10px 24px rgba(0, 0, 0, 0.34),
             0 24px 48px rgba(0, 0, 0, 0.24);
+          --repl-caret-color: #f2f5f8;
+          --repl-input-color: #e2e8f0;
+          --repl-selection-bg: rgba(120, 168, 230, 0.32);
           --tok-pkg: #54d1c8;
           --tok-op: #ff907a;
           --tok-fn: #bc9cff;
@@ -225,6 +231,9 @@
           0 1px 1px rgba(27, 34, 44, 0.04),
           0 6px 18px rgba(27, 34, 44, 0.08),
           0 18px 36px rgba(27, 34, 44, 0.04);
+        --repl-caret-color: #1a1a1a;
+        --repl-input-color: #1f2933;
+        --repl-selection-bg: rgba(39, 109, 195, 0.22);
         --tok-pkg: #0d9488;
         --tok-op: #b03a28;
         --tok-fn: #6d28d9;
@@ -254,6 +263,9 @@
           0 1px 1px rgba(0, 0, 0, 0.28),
           0 10px 24px rgba(0, 0, 0, 0.34),
           0 24px 48px rgba(0, 0, 0, 0.24);
+        --repl-caret-color: #f2f5f8;
+        --repl-input-color: #e2e8f0;
+        --repl-selection-bg: rgba(120, 168, 230, 0.32);
         --tok-pkg: #54d1c8;
         --tok-op: #ff907a;
         --tok-fn: #bc9cff;
@@ -332,15 +344,107 @@
         }
       }
 
-      /* Hero R REPL - decorative R console with a Run button. */
+      /* Hero R REPL - typeable, decorative R console.
+
+         The console behaves like RStudio's pane: previously evaluated
+         commands appear as plain "scrollback" above the live prompt at
+         the bottom, which is a real text input the user can type
+         `quone::compile("file.Q")` into. */
       .repl-window {
         box-shadow: var(--repl-shadow);
       }
-      .repl-command .tok-pkg { color: var(--tok-pkg); font-weight: 600; }
-      .repl-command .tok-op  { color: var(--tok-op); }
-      .repl-command .tok-fn  { color: var(--tok-fn); font-weight: 500; }
-      .repl-command .tok-paren { color: var(--tok-paren); }
-      .repl-command .tok-str { color: var(--tok-str); }
+      .repl-title-sep {
+        opacity: 0.55;
+      }
+      .repl-demo-note {
+        white-space: nowrap;
+        letter-spacing: 0.01em;
+        opacity: 0.8;
+      }
+
+      /* Scrollback rows: previously submitted command + its result.
+         Slightly dimmed so the live prompt at the bottom reads as
+         "now". */
+      .repl-history {
+        opacity: 0.78;
+      }
+      .repl-history > * {
+        user-select: text;
+      }
+
+      /* Errors are coloured via elm-ui's `Font.color` so the inline
+         style wins the cascade; this class is only a hook for tests
+         and the slide-in animation below. */
+
+      /* Live `>` prompt: a syntax-highlighted overlay layered on top
+         of an otherwise transparent native `<input>`. The user types
+         into the real input (so caret, selection, IME, autofill
+         suppression and accessibility all work natively); the overlay
+         visually paints the same characters, coloured.
+
+         For the alignment to be pixel-perfect we share font-family,
+         font-size, line-height, letter-spacing, padding and box-sizing
+         between the input and the overlay. */
+      .repl-input-wrap {
+        position: relative;
+        flex: 1 1 auto;
+        min-width: 0;
+        font-family: "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace,
+          SFMono-Regular, Menlo, monospace;
+        font-size: 15px;
+        line-height: 1.5;
+        letter-spacing: 0;
+      }
+      .repl-input-wrap-sm {
+        font-size: 13px;
+      }
+      .repl-input-overlay {
+        position: absolute;
+        inset: 0;
+        display: block;
+        pointer-events: none;
+        white-space: pre;
+        overflow: hidden;
+        font: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        padding: 0;
+        margin: 0;
+        color: var(--repl-input-color);
+      }
+      .repl-input-overlay .tok-pkg   { color: var(--tok-pkg); font-weight: 600; }
+      .repl-input-overlay .tok-op    { color: var(--tok-op); }
+      .repl-input-overlay .tok-fn    { color: var(--tok-fn); font-weight: 500; }
+      .repl-input-overlay .tok-paren { color: var(--tok-paren); }
+      .repl-input-overlay .tok-str   { color: var(--tok-str); }
+      .repl-input {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        background: transparent;
+        border: 0;
+        outline: none;
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+        font: inherit;
+        line-height: inherit;
+        letter-spacing: inherit;
+        color: transparent;
+        caret-color: var(--repl-caret-color);
+      }
+      /* When the value is empty the overlay is skipped and the input's
+         own placeholder shows through. We re-tint it visible because
+         the input text is otherwise transparent. */
+      .repl-input::placeholder {
+        color: var(--repl-input-color);
+        opacity: 0.45;
+        font-style: italic;
+      }
+      .repl-input::selection {
+        background: var(--repl-selection-bg);
+      }
 
       .repl-run {
         transition: background-color 140ms ease, transform 80ms ease;
@@ -362,17 +466,46 @@
         transform: translateY(0.5px);
       }
 
-      /* Animated trailing dots on the "compiling Quone" line. */
-      @keyframes repl-dot-blink {
-        0%, 20%   { opacity: 0; }
-        50%, 100% { opacity: 1; }
+      /* Terminal-style Braille spinner for the in-flight indicator.
+         Same family of glyphs you see in cargo, pnpm, gh, etc., so it
+         reads as "a CLI is doing work" without breaking the R-console
+         aesthetic of the box. */
+      @keyframes repl-spinner-frames {
+        0%   { content: "\2807"; } /* ⠇ */
+        10%  { content: "\2826"; } /* ⠦ */
+        20%  { content: "\2834"; } /* ⠴ */
+        30%  { content: "\2838"; } /* ⠸ */
+        40%  { content: "\2819"; } /* ⠙ */
+        50%  { content: "\280B"; } /* ⠋ */
+        60%  { content: "\280F"; } /* ⠏ */
+        70%  { content: "\2807"; } /* ⠇ */
+        80%  { content: "\2826"; } /* ⠦ */
+        90%  { content: "\2834"; } /* ⠴ */
+        100% { content: "\2838"; } /* ⠸ */
       }
-      .repl-dot {
-        animation: repl-dot-blink 1.2s infinite;
+      @keyframes repl-compiling-pulse {
+        0%, 100% { opacity: 0.78; }
+        50%      { opacity: 1; }
       }
-      .repl-dot-1 { animation-delay: 0s;   }
-      .repl-dot-2 { animation-delay: 0.2s; }
-      .repl-dot-3 { animation-delay: 0.4s; }
+      .repl-spinner {
+        display: inline-block;
+        width: 1ch;
+        margin-right: 0.6ch;
+        color: var(--tok-pkg);
+        font-weight: 600;
+        /* The glyph itself is delivered via the ::before pseudo so we
+           can flip its `content` on every animation step. The wrapper
+           is hidden from assistive tech via aria-hidden in the markup
+           so screen readers only get the "Compiling" label. */
+      }
+      .repl-spinner::before {
+        content: "\280B";
+        animation: repl-spinner-frames 900ms steps(1, end) infinite;
+      }
+      .repl-compiling-label {
+        animation: repl-compiling-pulse 1.6s ease-in-out infinite;
+        letter-spacing: 0.01em;
+      }
 
       /* Compiling line + R output enter with a small slide-in. */
       @keyframes repl-rise {
@@ -380,15 +513,33 @@
         to   { opacity: 1; transform: translateY(0); }
       }
       .repl-compiling,
-      .repl-output {
+      .repl-output,
+      .repl-error {
         animation: repl-rise 240ms ease-out both;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .repl-dot { animation: none; opacity: 1; }
-        .repl-compiling,
-        .repl-output {
+        .repl-spinner::before {
           animation: none;
+          content: "\28FF"; /* ⣿ -- a solid, "in-flight" looking glyph */
+        }
+        .repl-compiling-label {
+          animation: none;
+          opacity: 1;
+        }
+        .repl-compiling,
+        .repl-output,
+        .repl-error {
+          animation: none;
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* On phones the title bar gets tight; abbreviating to "demo"
+           is enough since the tooltip on hover/long-press still spells
+           it out. */
+        .repl-demo-note {
+          font-size: 12px;
         }
       }
 
