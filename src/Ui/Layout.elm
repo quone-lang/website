@@ -2,7 +2,6 @@ module Ui.Layout exposing
     ( page
     , section
     , wideSection
-    , header
     , footer
     )
 
@@ -14,12 +13,14 @@ import Element
         ( Element
         , alignLeft
         , alignRight
+        , alignTop
         , centerX
         , centerY
         , column
         , el
         , fill
         , height
+        , htmlAttribute
         , link
         , maximum
         , newTabLink
@@ -30,12 +31,13 @@ import Element
         , spacing
         , text
         , width
-        , wrappedRow
         )
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
+import Element.Input as Input
 import Element.Region as Region
+import Html.Attributes
 import Ui.Eyebrow as Eyebrow
 import Ui.Logo as Logo
 import Ui.Theme as Theme exposing (palette, type_)
@@ -47,14 +49,21 @@ import Ui.Viewport as Viewport
 
 
 {-| Whole-page wrapper: header, content column, footer.
+
+The header is responsive: compact viewports show a menu button that
+toggles a stacked panel of nav links; wider viewports show a single
+horizontal row.
+
 -}
 page :
     { viewport : Viewport.Viewport
     , currentPath : String
+    , isMenuOpen : Bool
+    , onToggleMenu : msg
     , content : Element msg
     }
     -> Element msg
-page { viewport, currentPath, content } =
+page { viewport, currentPath, isMenuOpen, onToggleMenu, content } =
     column
         [ width fill
         , height fill
@@ -63,7 +72,12 @@ page { viewport, currentPath, content } =
         , Font.family [ Theme.fontSans, Font.sansSerif ]
         , Font.size type_.bodySize
         ]
-        [ header viewport currentPath
+        [ header
+            { viewport = viewport
+            , currentPath = currentPath
+            , isMenuOpen = isMenuOpen
+            , onToggleMenu = onToggleMenu
+            }
         , column
             [ width fill
             , spacing (pageSpacing viewport)
@@ -78,18 +92,20 @@ page { viewport, currentPath, content } =
 -- HEADER
 
 
-header : Viewport.Viewport -> String -> Element msg
-header viewport currentPath =
+header :
+    { viewport : Viewport.Viewport
+    , currentPath : String
+    , isMenuOpen : Bool
+    , onToggleMenu : msg
+    }
+    -> Element msg
+header { viewport, currentPath, isMenuOpen, onToggleMenu } =
     let
-        navLinks =
-            [ navLink currentPath "/" "Home"
-            , navLink currentPath "/install" "Install"
-            , externalLink
-                "https://github.com/armcn/quone-lang/blob/main/compiler/docs/LANGUAGE.md"
-                "Reference"
-            , externalLink
-                "https://github.com/armcn/quone-lang"
-                "GitHub"
+        navItems =
+            [ ( "/", "Home", Internal )
+            , ( "/install", "Install", Internal )
+            , ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md", "Reference", External )
+            , ( "https://github.com/quone-lang/quone", "GitHub", External )
             ]
 
         contentPadding =
@@ -106,19 +122,32 @@ header viewport currentPath =
                 [ width (fill |> maximum Theme.maxContentWidth)
                 , centerX
                 , paddingXY contentPadding Theme.space.md
-                , spacing Theme.space.sm
+                , spacing Theme.space.md
                 ]
-                [ row [ width fill, centerY ]
+                [ row [ width fill, centerY, spacing Theme.space.md ]
                     [ link [ alignLeft ]
                         { url = "/"
                         , label = Logo.full { wordmarkSize = 22, markSize = 34 }
                         }
+                    , el [ alignRight ]
+                        (menuButton
+                            { isOpen = isMenuOpen
+                            , onPress = onToggleMenu
+                            }
+                        )
                     ]
-                , wrappedRow
-                    [ width fill
-                    , spacing Theme.space.md
-                    ]
-                    navLinks
+                , if isMenuOpen then
+                    column
+                        [ width fill
+                        , spacing Theme.space.sm
+                        , paddingXY 0 Theme.space.sm
+                        , Border.widthEach { top = 1, right = 0, bottom = 0, left = 0 }
+                        , Border.color palette.border
+                        ]
+                        (List.map (mobileNavItem currentPath) navItems)
+
+                  else
+                    none
                 ]
 
          else
@@ -134,9 +163,101 @@ header viewport currentPath =
                     }
                 , row
                     [ alignRight, spacing Theme.space.lg, centerY ]
-                    navLinks
+                    (List.map (desktopNavItem currentPath) navItems)
                 ]
         )
+
+
+type LinkKind
+    = Internal
+    | External
+
+
+desktopNavItem : String -> ( String, String, LinkKind ) -> Element msg
+desktopNavItem currentPath ( url, label, kind ) =
+    case kind of
+        Internal ->
+            navLink currentPath url label
+
+        External ->
+            externalLink url label
+
+
+mobileNavItem : String -> ( String, String, LinkKind ) -> Element msg
+mobileNavItem currentPath ( url, label, kind ) =
+    let
+        attrs =
+            [ width fill
+            , paddingXY Theme.space.sm Theme.space.sm
+            , Border.rounded Theme.radius.sm
+            , Font.size type_.bodySize
+            , Font.medium
+            ]
+    in
+    case kind of
+        Internal ->
+            let
+                isActive =
+                    currentPath == url
+            in
+            link (attrs ++ [ Font.color (if isActive then palette.primary else palette.textSecondary) ])
+                { url = url, label = text label }
+
+        External ->
+            newTabLink (attrs ++ [ Font.color palette.textSecondary ])
+                { url = url, label = text label }
+
+
+menuButton : { isOpen : Bool, onPress : msg } -> Element msg
+menuButton { isOpen, onPress } =
+    Input.button
+        [ paddingXY Theme.space.sm Theme.space.xs
+        , Border.rounded Theme.radius.sm
+        , Border.width 1
+        , Border.color
+            (if isOpen then
+                palette.primary
+
+             else
+                palette.border
+            )
+        , Background.color palette.surface
+        , Font.size type_.bodySize
+        , Font.color palette.textPrimary
+        ]
+        { onPress = Just onPress
+        , label = menuButtonLabel isOpen
+        }
+
+
+menuButtonLabel : Bool -> Element msg
+menuButtonLabel isOpen =
+    let
+        glyph =
+            if isOpen then
+                "\u{2715}"
+
+            else
+                "\u{2630}"
+    in
+    row
+        [ spacing Theme.space.xs, centerY ]
+        [ el
+            [ Font.size 18
+            , Font.semiBold
+            , htmlAttribute (Html.Attributes.attribute "aria-hidden" "true")
+            ]
+            (text glyph)
+        , el [ Font.size type_.smallSize ]
+            (text
+                (if isOpen then
+                    "Close"
+
+                 else
+                    "Menu"
+                )
+            )
+        ]
 
 
 navLink : String -> String -> String -> Element msg
@@ -179,41 +300,37 @@ footer viewport =
     let
         brandBlock =
             column
-                [ alignLeft
+                [ alignTop
+                , alignLeft
                 , spacing Theme.space.sm
+                , width fill
                 ]
                 [ Logo.full { wordmarkSize = 18, markSize = 30 }
-                , el
-                    [ Font.color palette.textMuted
-                    , Font.size type_.smallSize
-                    ]
-                    (text "A typed functional language for R.")
                 ]
 
         projectBlock =
-            column
-                [ spacing Theme.space.sm
+            footerColumn "Project"
+                [ ( "https://github.com/quone-lang", "GitHub" )
+                , ( "https://github.com/quone-lang/quone/issues", "Issue tracker" )
                 ]
-                [ footerHeading "Project"
-                , footerLink
-                    "https://github.com/armcn/quone-lang"
-                    "GitHub"
-                , footerLink
-                    "https://github.com/armcn/quone-lang/blob/main/compiler/docs/LANGUAGE.md"
-                    "Language reference"
-                , footerLink
-                    "https://github.com/armcn/quone-lang/issues"
-                    "Issue tracker"
+
+        learnBlock =
+            footerColumn "Learn"
+                [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
+                  , "Language reference"
+                  )
+                , ( "https://github.com/quone-lang/quone/tree/main/examples", "Examples" )
                 ]
 
         builtOnBlock =
-            column
-                [ spacing Theme.space.sm
+            footerColumn "Built on"
+                [ ( "https://www.r-project.org/", "R" )
+                , ( "https://www.haskell.org/", "Haskell" )
+                , ( "https://elm-lang.org/", "Elm" )
                 ]
-                [ footerHeading "Built on"
-                , footerLink "https://www.r-project.org/" "R"
-                , footerLink "https://elm-lang.org/" "Elm (this site)"
-                ]
+
+        columns =
+            [ brandBlock, projectBlock, learnBlock, builtOnBlock ]
     in
     el
         [ width fill
@@ -232,35 +349,15 @@ footer viewport =
                     [ width fill
                     , spacing Theme.space.lg
                     ]
-                    [ brandBlock
-                    , projectBlock
-                    , builtOnBlock
-                    ]
+                    columns
 
               else
                 row
                     [ width fill
                     , spacing Theme.space.xl
+                    , alignTop
                     ]
-                    [ brandBlock
-                    , column [ alignRight, spacing Theme.space.sm ]
-                        [ footerHeading "Project"
-                        , footerLink
-                            "https://github.com/armcn/quone-lang"
-                            "GitHub"
-                        , footerLink
-                            "https://github.com/armcn/quone-lang/blob/main/compiler/docs/LANGUAGE.md"
-                            "Language reference"
-                        , footerLink
-                            "https://github.com/armcn/quone-lang/issues"
-                            "Issue tracker"
-                        ]
-                    , column [ alignRight, spacing Theme.space.sm ]
-                        [ footerHeading "Built on"
-                        , footerLink "https://www.r-project.org/" "R"
-                        , footerLink "https://elm-lang.org/" "Elm (this site)"
-                        ]
-                    ]
+                    columns
             , el
                 [ width fill
                 , Border.widthEach { top = 1, right = 0, bottom = 0, left = 0 }
@@ -268,11 +365,24 @@ footer viewport =
                 ]
                 none
             , el
-                [ Font.color palette.textMuted
+                [ alignLeft
+                , Font.color palette.textMuted
                 , Font.size type_.smallSize
                 ]
-                (text "Quone is an early-release language. v0.0.1.")
+                (text "Quone v0.0.1 - pre-release work in progress. APIs and syntax may change.")
             ]
+        )
+
+
+footerColumn : String -> List ( String, String ) -> Element msg
+footerColumn heading links =
+    column
+        [ alignTop
+        , spacing Theme.space.sm
+        , width fill
+        ]
+        (footerHeading heading
+            :: List.map (\( url, label ) -> footerLink url label) links
         )
 
 

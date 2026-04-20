@@ -17,10 +17,9 @@ SPA can resolve them).
 import Browser
 import Browser.Events
 import Browser.Navigation as Nav
-import Element exposing (Element, fill, height, layout, map, width)
+import Element exposing (Element, fill, height, layout, width)
 import Element.Background as Background
 import Element.Font as Font
-import Page.Explorer as Explorer
 import Page.Home as Home
 import Page.Install as Install
 import Ui.Layout as Layout
@@ -52,9 +51,9 @@ main =
 type alias Model =
     { key : Nav.Key
     , page : Page
-    , explorer : Explorer.Model
-    , expandedShowcase : Maybe Home.ShowcaseId
+    , heroState : Home.HeroState
     , viewport : Viewport.Viewport
+    , isMenuOpen : Bool
     }
 
 
@@ -68,9 +67,9 @@ init : Viewport.Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     ( { key = key
       , page = pageFromUrl url
-      , explorer = Explorer.init
-      , expandedShowcase = Nothing
+      , heroState = Home.initHeroState
       , viewport = Viewport.fromFlags flags
+      , isMenuOpen = False
       }
     , Cmd.none
     )
@@ -103,6 +102,7 @@ type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | HomeMsg Home.Msg
+    | ToggleMenu
     | ViewportChanged Int Int
 
 
@@ -116,29 +116,37 @@ update msg model =
             ( model, Nav.load href )
 
         UrlChanged url ->
-            ( { model | page = pageFromUrl url }, Cmd.none )
+            ( { model | page = pageFromUrl url, isMenuOpen = False }, Cmd.none )
 
         HomeMsg subMsg ->
-            case subMsg of
-                Home.ExplorerMsg explorerMsg ->
-                    ( { model | explorer = Explorer.update explorerMsg model.explorer }
-                    , Cmd.none
-                    )
+            let
+                ( newHeroState, heroCmd ) =
+                    Home.updateHero subMsg model.heroState
+            in
+            ( { model | heroState = newHeroState }
+            , Cmd.map HomeMsg heroCmd
+            )
 
-                Home.ToggleShowcase showcaseId ->
-                    ( { model
-                        | expandedShowcase =
-                            if model.expandedShowcase == Just showcaseId then
-                                Nothing
-
-                            else
-                                Just showcaseId
-                      }
-                    , Cmd.none
-                    )
+        ToggleMenu ->
+            ( { model | isMenuOpen = not model.isMenuOpen }, Cmd.none )
 
         ViewportChanged width height ->
-            ( { model | viewport = Viewport.fromSize width height }
+            let
+                newViewport =
+                    Viewport.fromSize width height
+
+                stillCompact =
+                    Viewport.isCompact newViewport
+            in
+            ( { model
+                | viewport = newViewport
+                , isMenuOpen =
+                    if stillCompact then
+                        model.isMenuOpen
+
+                    else
+                        False
+              }
             , Cmd.none
             )
 
@@ -167,6 +175,8 @@ view model =
             (Layout.page
                 { viewport = model.viewport
                 , currentPath = currentPath model.page
+                , isMenuOpen = model.isMenuOpen
+                , onToggleMenu = ToggleMenu
                 , content = pageContent model
                 }
             )
@@ -204,7 +214,8 @@ pageContent : Model -> Element Msg
 pageContent model =
     case model.page of
         HomePage ->
-            Element.map HomeMsg (Home.view model.viewport model.expandedShowcase model.explorer)
+            Element.map HomeMsg
+                (Home.view model.viewport model.heroState)
 
         InstallPage ->
             Install.view model.viewport

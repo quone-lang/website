@@ -45,6 +45,158 @@
       #root, .elm-app {
         min-height: 100%;
       }
+
+      /* Hero headline trailing-letter swap: the "R" crossfades into a
+         Quone-blue Bitcount-Grid "Q" when the hero heading is hovered. */
+      .hero-swap {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap;
+      }
+      .hero-swap-default,
+      .hero-swap-alt {
+        display: inline-block;
+        transition: opacity 220ms ease, transform 220ms ease;
+      }
+      .hero-swap-alt {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(calc(-50% + 0.12em));
+        opacity: 0;
+        color: #276dc3;
+        pointer-events: none;
+        font-family: "Bitcount Grid Double", "JetBrains Mono", monospace;
+        font-weight: 400;
+        font-size: 1.2em;
+        line-height: 1;
+      }
+      .hero-swap:hover .hero-swap-default,
+      h1:hover .hero-swap-default {
+        opacity: 0;
+        transform: translateY(-0.12em);
+      }
+      .hero-swap:hover .hero-swap-alt,
+      h1:hover .hero-swap-alt {
+        opacity: 1;
+        transform: translateY(-50%);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hero-swap-default,
+        .hero-swap-alt {
+          transition: none;
+          transform: none;
+        }
+      }
+
+      /* Hero R REPL - decorative R console with a Run button. */
+      .repl-window {
+        box-shadow:
+          0 1px 1px rgba(27, 34, 44, 0.04),
+          0 6px 18px rgba(27, 34, 44, 0.08),
+          0 18px 36px rgba(27, 34, 44, 0.04);
+      }
+      .repl-command .tok-pkg { color: #0d9488; font-weight: 600; }
+      .repl-command .tok-op  { color: #b03a28; }
+      .repl-command .tok-fn  { color: #6d28d9; font-weight: 500; }
+      .repl-command .tok-paren { color: #4a4a4a; }
+      .repl-command .tok-str { color: #a16207; }
+
+      .repl-run {
+        transition: background-color 140ms ease, transform 80ms ease;
+      }
+      .repl-run:active {
+        transform: scale(0.96);
+      }
+      .repl-run-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        line-height: 1;
+      }
+      .repl-play {
+        display: inline-block;
+        font-size: 0.78em;
+        line-height: 1;
+        transform: translateY(0.5px);
+      }
+
+      /* Animated trailing dots on the "compiling Quone" line. */
+      @keyframes repl-dot-blink {
+        0%, 20%   { opacity: 0; }
+        50%, 100% { opacity: 1; }
+      }
+      .repl-dot {
+        animation: repl-dot-blink 1.2s infinite;
+      }
+      .repl-dot-1 { animation-delay: 0s;   }
+      .repl-dot-2 { animation-delay: 0.2s; }
+      .repl-dot-3 { animation-delay: 0.4s; }
+
+      /* Compiling line + R output enter with a small slide-in. */
+      @keyframes repl-rise {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .repl-compiling,
+      .repl-output {
+        animation: repl-rise 240ms ease-out both;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .repl-dot { animation: none; opacity: 1; }
+        .repl-compiling,
+        .repl-output {
+          animation: none;
+        }
+      }
+
+      /* Snippet tab strip above the hero Quone source. Looks like a
+         row of editor file tabs; horizontally scrolls on mobile. */
+      .snippet-tabs {
+        display: flex;
+        gap: 2px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        border-bottom: 1px solid #e5e5e3;
+        padding: 0 2px;
+      }
+      .snippet-tabs::-webkit-scrollbar {
+        display: none;
+      }
+      .snippet-tab {
+        flex: 0 0 auto;
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -1px;
+        padding: 8px 14px;
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular,
+          Menlo, Consolas, monospace;
+        font-size: 13px;
+        color: #8a8a8a;
+        cursor: pointer;
+        transition: color 140ms ease, border-color 140ms ease,
+          background-color 140ms ease;
+        white-space: nowrap;
+        line-height: 1.2;
+      }
+      .snippet-tab:hover {
+        color: #1a1a1a;
+        background-color: rgba(39, 109, 195, 0.04);
+      }
+      .snippet-tab-active {
+        color: #1a1a1a;
+        border-bottom-color: #276dc3;
+        font-weight: 500;
+      }
+      .snippet-tab:focus-visible {
+        outline: 2px solid #276dc3;
+        outline-offset: -2px;
+        border-radius: 2px;
+      }
     </style>
   </head>
   <body>

@@ -13,9 +13,9 @@ silhouette without needing an SVG.
 import Element
     exposing
         ( Element
-        , alignBottom
         , centerY
         , el
+        , moveDown
         , row
         , spacing
         , text
@@ -47,14 +47,14 @@ full { wordmarkSize, markSize } =
         [ spacing 6
         , centerY
         ]
-        [ mark markSize
+        [ el [ centerY, moveDown 3 ] (mark markSize)
         , el
             [ Font.family [ Theme.fontDisplay, Font.sansSerif ]
             , Font.color palette.textPrimary
             , Font.size wordmarkSize
             , Font.semiBold
             , Font.letterSpacing -0.4
-            , alignBottom
+            , centerY
             ]
             (text "quone")
         ]

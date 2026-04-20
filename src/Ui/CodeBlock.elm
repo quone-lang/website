@@ -2,6 +2,7 @@ module Ui.CodeBlock exposing
     ( Language(..)
     , view
     , viewSideBySide
+    , viewBare
     , viewInline
     )
 
@@ -110,6 +111,35 @@ viewSideBySide viewport parts =
         [ pane Quone parts.quone
         , pane R parts.r
         ]
+
+
+{-| A bare list of syntax-highlighted lines with no card chrome,
+suitable for embedding inside another container (the hero REPL renders
+its compiled output this way so the R looks like printed terminal
+output, not a nested code card).
+-}
+viewBare : Viewport.Viewport -> Language -> String -> Element msg
+viewBare viewport lang source =
+    let
+        renderedLines =
+            source
+                |> String.lines
+                |> List.map (renderLine lang)
+    in
+    column
+        [ Font.family [ Theme.fontMono, Font.monospace ]
+        , Font.size
+            (if Viewport.isHandset viewport then
+                type_.codeSmallSize
+
+             else
+                type_.codeSize
+            )
+        , Font.color palette.codePlain
+        , spacing 4
+        , width fill
+        ]
+        renderedLines
 
 
 {-| Inline code, used inside paragraphs.

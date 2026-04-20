@@ -1,7 +1,10 @@
 module Page.Install exposing (view)
 
-{-| The install page. Plain, scannable, and prerequisite-aware: the
-audience is R users who may have never installed a Haskell toolchain.
+{-| The install page. Most users will reach Quone through the R
+package - a thin wrapper around the compiler that exposes a single
+`quone::compile()` function. The page leads with that path, then keeps
+a compact "build the compiler yourself" section for power users and
+contributors.
 -}
 
 import Element
@@ -46,8 +49,9 @@ view viewport =
                 [ pageTitle viewport
                 , intro
                 , prerequisites viewport
-                , buildSteps viewport
-                , quickstart viewport
+                , installPackage viewport
+                , quickstartR viewport
+                , buildFromSource viewport
                 , next viewport
                 ]
         }
@@ -69,7 +73,7 @@ pageTitle viewport =
         , Font.letterSpacing -0.6
         , Region.heading 1
         ]
-        [ text "Build Quone from source." ]
+        [ text "Install the Quone R package." ]
 
 
 intro : Element msg
@@ -81,13 +85,18 @@ intro =
             , Font.color palette.textSecondary
             , Element.spacing 6
             ]
-            [ text """v0.0.1 is a build-from-source release. The compiler is a single Cabal project; the only runtime dependency is R itself, plus the R packages dplyr, purrr, readr, and roxygen2.""" ]
+            [ text "Most users reach Quone through the "
+            , CodeBlock.viewInline "quone"
+            , text " R package. It bundles the compiler and exposes a single function, "
+            , CodeBlock.viewInline "quone::compile()"
+            , text ", so you can compile a Quone source file from the same R session you already use for analysis."
+            ]
         , paragraph
             [ Font.size type_.bodySize
             , Font.color palette.textMuted
             , Element.spacing 6
             ]
-            [ text "If you are still evaluating Quone, the interactive explorer and code examples on the home page are a faster first stop than installing a Haskell toolchain." ]
+            [ text "v0.0.1 is GitHub-only. CRAN release will follow once the API stabilises." ]
         ]
 
 
@@ -98,11 +107,6 @@ prerequisites viewport =
         [ heading viewport "Prerequisites"
         , bulleted
             [ paragraphWith
-                [ text "GHC and Cabal. We recommend "
-                , link "https://www.haskell.org/ghcup/" "ghcup"
-                , text " to install both: pick the latest stable GHC and Cabal."
-                ]
-            , paragraphWith
                 [ text "R 4.1 or newer. Quone uses R's native pipe; older R versions are not supported." ]
             , paragraphWith
                 [ text "The R packages "
@@ -113,20 +117,115 @@ prerequisites viewport =
                 , CodeBlock.viewInline "readr"
                 , text ", and "
                 , CodeBlock.viewInline "roxygen2"
-                , text "."
+                , text " (pulled in as dependencies, but you can install them up front if you prefer)."
+                ]
+            , paragraphWith
+                [ text "Either "
+                , CodeBlock.viewInline "pak"
+                , text " or "
+                , CodeBlock.viewInline "remotes"
+                , text " to install from GitHub."
                 ]
             ]
-        , codeShell viewport """install.packages(c("dplyr", "purrr", "readr", "roxygen2"))"""
         ]
 
 
-buildSteps : Viewport.Viewport -> Element msg
-buildSteps viewport =
+installPackage : Viewport.Viewport -> Element msg
+installPackage viewport =
     column
         [ width fill, spacing Theme.space.md ]
-        [ heading viewport "Build the compiler"
-        , codeShell viewport """git clone https://github.com/quone-lang/compiler.git
-cd compiler
+        [ heading viewport "Install from GitHub"
+        , paragraph
+            [ Font.size type_.bodySize
+            , Font.color palette.textSecondary
+            , Element.spacing 6
+            ]
+            [ text "From your R console, install with "
+            , CodeBlock.viewInline "pak"
+            , text ":"
+            ]
+        , codeShell viewport """pak::pak("quone-lang/quone")"""
+        , paragraph
+            [ Font.size type_.bodySize
+            , Font.color palette.textSecondary
+            , Element.spacing 6
+            ]
+            [ text "Or, equivalently, with "
+            , CodeBlock.viewInline "remotes"
+            , text ":"
+            ]
+        , codeShell viewport """remotes::install_github("quone-lang/quone")"""
+        ]
+
+
+quickstartR : Viewport.Viewport -> Element msg
+quickstartR viewport =
+    column
+        [ width fill, spacing Theme.space.md ]
+        [ heading viewport "Compile your first file"
+        , paragraph
+            [ Font.size type_.bodySize
+            , Font.color palette.textSecondary
+            , Element.spacing 6
+            ]
+            [ text "Save a Quone source file (the convention is the "
+            , CodeBlock.viewInline ".Q"
+            , text " extension) and call "
+            , CodeBlock.viewInline "quone::compile()"
+            , text " on it from R. The function writes the generated R alongside the source and returns its path."
+            ]
+        , codeShell viewport """library(quone)
+
+# normalize.Q -> normalize.R
+out <- quone::compile("normalize.Q")
+
+source(out)
+normalize(100, 87)
+#> [1] 0.87"""
+        , paragraph
+            [ Font.size type_.bodySize
+            , Font.color palette.textSecondary
+            , Element.spacing 6
+            ]
+            [ text "Pass "
+            , CodeBlock.viewInline "package = TRUE"
+            , text " for a multi-module project and Quone will emit a full R-package skeleton ("
+            , CodeBlock.viewInline "DESCRIPTION"
+            , text ", "
+            , CodeBlock.viewInline "NAMESPACE"
+            , text ", and roxygen-driven "
+            , CodeBlock.viewInline "man/"
+            , text " pages) from your "
+            , CodeBlock.viewInline "module"
+            , text " headers and "
+            , CodeBlock.viewInline "@export"
+            , text " tags."
+            ]
+        ]
+
+
+buildFromSource : Viewport.Viewport -> Element msg
+buildFromSource viewport =
+    column
+        [ width fill, spacing Theme.space.md ]
+        [ heading viewport "Build the compiler from source"
+        , paragraph
+            [ Font.size type_.bodySize
+            , Font.color palette.textMuted
+            , Element.spacing 6
+            ]
+            [ text "Most users do not need this section. The R package above ships the compiler binary it needs. Build from source if you want to hack on the compiler itself, run the test suite, or use Quone outside an R session." ]
+        , subheading viewport "Compiler prerequisites"
+        , bulleted
+            [ paragraphWith
+                [ text "GHC and Cabal. We recommend "
+                , link "https://www.haskell.org/ghcup/" "ghcup"
+                , text " to install both: pick the latest stable GHC and Cabal."
+                ]
+            ]
+        , subheading viewport "Build"
+        , codeShell viewport """git clone https://github.com/quone-lang/quone.git
+cd quone/compiler
 cabal build
 cabal install --installdir=$HOME/.local/bin --overwrite-policy=always"""
         , paragraph
@@ -136,34 +235,12 @@ cabal install --installdir=$HOME/.local/bin --overwrite-policy=always"""
             ]
             [ text "This produces the "
             , CodeBlock.viewInline "quonec"
-            , text " executable on your $PATH."
+            , text " executable on your $PATH. The R package looks for it before falling back to its bundled binary, so a freshly-built "
+            , CodeBlock.viewInline "quonec"
+            , text " is what every "
+            , CodeBlock.viewInline "quone::compile()"
+            , text " call will use."
             ]
-        ]
-
-
-quickstart : Viewport.Viewport -> Element msg
-quickstart viewport =
-    column
-        [ width fill, spacing Theme.space.md ]
-        [ heading viewport "Quickstart"
-        , paragraph
-            [ Font.size type_.bodySize
-            , Font.color palette.textSecondary
-            , Element.spacing 6
-            ]
-            [ text "Scaffold a project, build it, and run the result:" ]
-        , codeShell viewport """quonec new my-stats
-cd my-stats
-quonec build
-quonec run"""
-        , paragraph
-            [ Font.size type_.bodySize
-            , Font.color palette.textSecondary
-            , Element.spacing 6
-            ]
-            [ text "Quone auto-detects whether your project is a single-file script or a multi-module package. To force one or the other:" ]
-        , codeShell viewport """quonec build --script main.Q
-quonec build --package"""
         ]
 
 
@@ -175,17 +252,17 @@ next viewport =
         , bulleted
             [ paragraphWith
                 [ text "Read the "
-                , link "https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE.md" "language reference"
+                , link "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md" "language reference"
                 , text " for the full specification of v0.0.1."
                 ]
             , paragraphWith
                 [ text "Browse "
-                , link "https://github.com/quone-lang/compiler/tree/main/examples" "example projects"
+                , link "https://github.com/quone-lang/quone/tree/main/examples" "example projects"
                 , text " for working scripts and a multi-module package."
                 ]
             , paragraphWith
                 [ text "File issues or feature requests on "
-                , link "https://github.com/quone-lang/compiler/issues" "GitHub"
+                , link "https://github.com/quone-lang/quone/issues" "GitHub"
                 , text "."
                 ]
             ]
@@ -209,6 +286,29 @@ heading viewport label =
         , Font.semiBold
         , Font.color palette.textPrimary
         , Region.heading 2
+        ]
+        (text label)
+
+
+subheading : Viewport.Viewport -> String -> Element msg
+subheading viewport label =
+    el
+        [ Font.size
+            (if Viewport.isHandset viewport then
+                18
+
+             else
+                type_.h3Size
+            )
+        , Font.semiBold
+        , Font.color palette.textPrimary
+        , Region.heading 3
+        , paddingEach
+            { top = Theme.space.sm
+            , right = 0
+            , bottom = 0
+            , left = 0
+            }
         ]
         (text label)
 

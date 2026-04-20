@@ -1,6 +1,8 @@
 module Content.Pitch exposing
-    ( Feature
+    ( Accent(..)
+    , Feature
     , tagline
+    , taglinePrefix
     , subtagline
     , features
     , whyQuone
@@ -19,37 +21,59 @@ producing code they could have written themselves.
 
 tagline : String
 tagline =
-    "A typed functional language for R."
+    taglinePrefix ++ " R"
+
+
+{-| Stable portion of the hero headline; the trailing letter is rendered
+separately so it can crossfade between R and Q on hover.
+-}
+taglinePrefix : String
+taglinePrefix =
+    "A typed functional language for"
 
 
 subtagline : String
 subtagline =
-    "Quone adds static guarantees to R workflows, then compiles back to readable R your team can run, debug, and ship."
+    "Quone adds static guarantees to R workflows. Install the pre-release R package, call quone::compile() on a .Q file, and ship the readable R it emits."
 
 
 
 -- FEATURE CARDS
 
 
+type Accent
+    = AccentPrimary
+    | AccentSecondary
+    | AccentNeutral
+
+
 type alias Feature =
     { title : String
     , body : String
+    , glyph : String
+    , accent : Accent
     }
 
 
 features : List Feature
 features =
-    [ { title = "Readable R out"
+    [ { title = "Lives inside R"
       , body =
-            "Generated R looks like code an R developer would actually write, with no runtime wrapper to decode first."
+            "Install the quone R package, call quone::compile() from your usual R session, and source the result. No new toolchain to manage."
+      , glyph = "R"
+      , accent = AccentPrimary
       }
     , { title = "Typed pipelines"
       , body =
             "Dataframe verbs stay dplyr-shaped, but column references and pipeline stages are checked before you ship."
+      , glyph = "\u{03BB}"
+      , accent = AccentSecondary
       }
-    , { title = "Fits existing teams"
+    , { title = "Hand off plain R"
       , body =
-            "You still hand off plain R, package it the usual way, and keep using the ecosystem your collaborators already know."
+            "The output is ordinary R - no runtime wrapper - so collaborators who never touch Quone can still read, run, and package it."
+      , glyph = "\u{2713}"
+      , accent = AccentNeutral
       }
     ]
 
@@ -60,6 +84,6 @@ features =
 
 whyQuone : List String
 whyQuone =
-    [ "Quone is for R users who want compiler help without giving up the R ecosystem they already work in."
+    [ "Quone is for R users who want compiler help without leaving R. The quone package installs from GitHub today and exposes a single quone::compile() function; everything else is R."
     , "v0.0.1 is early, but already useful for teams that want more confidence around pipelines, functions, and package-ready output."
     ]
