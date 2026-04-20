@@ -221,6 +221,7 @@
       .repl-run-label {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
         line-height: 1;
       }
@@ -304,6 +305,20 @@
         outline: 2px solid var(--tab-focus);
         outline-offset: -2px;
         border-radius: 2px;
+      }
+
+      @media (max-width: 640px) {
+        .snippet-tabs {
+          gap: 2px;
+          padding: 0 1px;
+        }
+        .snippet-tab {
+          padding: 6px 10px;
+          font-size: 12px;
+        }
+        .repl-run-label {
+          gap: 6px;
+        }
       }
     </style>
   </head>

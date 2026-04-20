@@ -156,7 +156,14 @@ titleBar themeMode viewport =
             , Border.color colors.border
             , spacing Theme.space.sm
             ]
-            [ trafficLights ]
+            [ trafficLights
+            , el
+                [ Font.family [ Theme.fontMono, Font.monospace ]
+                , Font.size type_.smallSize
+                , Font.color colors.textMuted
+                ]
+                (text "R preview")
+            ]
 
     else
         row
@@ -224,6 +231,8 @@ inputRow themeMode viewport { command, output, onRun } =
                 [ width fill
                 , htmlAttribute (Html.Attributes.style "min-width" "0")
                 , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
+                , htmlAttribute (Html.Attributes.style "overflow-y" "hidden")
+                , htmlAttribute (Html.Attributes.style "-webkit-overflow-scrolling" "touch")
                 , htmlAttribute (Html.Attributes.class "repl-command-cell")
                 ]
                 (commandLine themeMode viewport command)
@@ -368,18 +377,29 @@ runButton { themeMode, isRunning, onRun, compact } =
             Element.html
                 (Html.span
                     [ Html.Attributes.class "repl-run-label" ]
-                    [ playGlyphHtml, Html.text "Preview R" ]
+                    (if compact then
+                        [ Html.text "Preview" ]
+
+                     else
+                        [ playGlyphHtml, Html.text "Preview R" ]
+                    )
                 )
 
         baseAttrs =
             [ Background.color (runGreen themeMode)
             , Font.color colors.textOnPrimary
             , Font.size type_.smallSize
-            , Font.medium
-            , Border.rounded Theme.radius.sm
+            , Font.semiBold
+            , Border.rounded
+                (if compact then
+                    Theme.radius.md
+
+                 else
+                    Theme.radius.sm
+                )
             , paddingXY Theme.space.md
                 (if compact then
-                    Theme.space.sm + 2
+                    Theme.space.sm + 4
 
                  else
                     Theme.space.xs + 2
@@ -398,7 +418,7 @@ runButton { themeMode, isRunning, onRun, compact } =
             , htmlAttribute
                 (Html.Attributes.style "min-height"
                     (if compact then
-                        "40px"
+                        "44px"
 
                      else
                         "auto"
@@ -461,6 +481,7 @@ outputArea themeMode viewport output =
             , spacing 6
             , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
             , htmlAttribute (Html.Attributes.style "min-width" "0")
+            , htmlAttribute (Html.Attributes.style "-webkit-overflow-scrolling" "touch")
             ]
     in
     case output of

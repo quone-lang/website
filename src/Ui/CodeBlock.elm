@@ -212,6 +212,7 @@ block themeMode viewport lang source =
         [ width fill
         , clip
         , scrollbarX
+        , htmlAttribute (Html.Attributes.style "-webkit-overflow-scrolling" "touch")
         , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
         , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
         ]
