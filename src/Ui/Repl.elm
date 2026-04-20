@@ -467,6 +467,7 @@ outputArea themeMode viewport output =
 
         baseAttrs =
             [ width fill
+            , height shrink
             , paddingXY pad (Theme.space.md - 2)
             , Background.color (reSurface themeMode)
             , Font.family [ Theme.fontMono, Font.monospace ]
@@ -479,6 +480,8 @@ outputArea themeMode viewport output =
                 )
             , Font.color colors.textPrimary
             , spacing 6
+            , htmlAttribute (Html.Attributes.style "flex-basis" "auto")
+            , htmlAttribute (Html.Attributes.style "flex-shrink" "0")
             , htmlAttribute (Html.Attributes.style "overflow-x" "auto")
             , htmlAttribute (Html.Attributes.style "min-width" "0")
             , htmlAttribute (Html.Attributes.style "-webkit-overflow-scrolling" "touch")

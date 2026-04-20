@@ -23,6 +23,19 @@ test("home page renders the hero preview shell", async ({ page }) => {
   await expect(page.getByText("normalize <- function(max_score, raw) {")).toBeVisible();
 });
 
+test("preview output expands to fit the generated R", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Preview generated R output" }).click();
+
+  const output = page.locator(".repl-output");
+  await expect(output).toBeVisible();
+
+  await expect(async () => {
+    const box = await output.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThan(40);
+  }).toPass();
+});
+
 test("snippet tabs support keyboard navigation", async ({ page }) => {
   await page.goto("/");
 
