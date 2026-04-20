@@ -1,10 +1,9 @@
 # Netlify configuration for the Quone marketing site.
 #
-# Connect this directory as a Netlify site and the configured build
+# Connect this repo as a Netlify site and the configured build
 # command below will produce dist/ on each push.
 
 [build]
-  base = "website/"
   publish = "dist/"
   command = "bash build.sh"
 

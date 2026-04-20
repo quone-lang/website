@@ -18,8 +18,11 @@ DIST="dist"
 rm -rf "$DIST"
 mkdir -p "$DIST"
 
+echo "Installing Elm..."
+npm install --no-save elm@0.19.1-5
+
 echo "Compiling Elm..."
-elm make src/Main.elm --optimize --output="$DIST/elm.js"
+npx --no-install elm make src/Main.elm --optimize --output="$DIST/elm.js"
 
 echo "Copying static assets..."
 cp -R static/. "$DIST/"
