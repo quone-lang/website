@@ -362,17 +362,33 @@
         opacity: 0.8;
       }
 
-      /* Scrollback rows: previously submitted command + its result.
-         Slightly dimmed so the live prompt at the bottom reads as
-         "now". */
+      /* Scrollback rows: a single inline mono line containing the
+         `>` prompt glyph and the submitted command. Rendering them
+         together (instead of as flex siblings) keeps the gap between
+         glyph and text at exactly one mono space wide, matching how
+         a real R console prints history.
+
+         When the row is followed by an output (i.e. it was already
+         executed), the line dims slightly so the most recent result
+         reads as "now" -- a subtle RStudio-style history fade. */
       .repl-history {
+        min-width: 0;
+      }
+      .repl-scrollback > *:not(:last-child) .repl-history {
         opacity: 0.78;
-        min-width: 0;
       }
-      .repl-history > * {
-        user-select: text;
-        min-width: 0;
+      .repl-prompt-glyph {
+        color: var(--tok-pkg);
+        font-weight: 600;
       }
+      /* Syntax highlighting on the prompt line. Same `tok-*` palette
+         the rest of the site uses for R, just scoped under the
+         history line so it doesn't bleed into other code blocks. */
+      .repl-history .tok-pkg   { color: var(--tok-pkg); font-weight: 600; }
+      .repl-history .tok-op    { color: var(--tok-op); }
+      .repl-history .tok-fn    { color: var(--tok-fn); font-weight: 500; }
+      .repl-history .tok-paren { color: var(--tok-paren); }
+      .repl-history .tok-str   { color: var(--tok-str); }
 
       /* Compiled R output. iOS Safari needs the same flex/min-width
          hygiene the rest of the REPL gets, otherwise long lines push
@@ -488,6 +504,33 @@
         font-size: 0.78em;
         line-height: 1;
         transform: translateY(0.5px);
+      }
+
+      /* Quiet "Reset" button shown after a run, in the same slot the
+         green Run button used to occupy. The intent is a "clear
+         scrollback" affordance, not a primary action -- so it reads
+         as muted chrome rather than competing with Run for
+         attention. */
+      .repl-reset {
+        transition:
+          background-color 140ms ease,
+          color 140ms ease,
+          transform 80ms ease;
+      }
+      .repl-reset:active {
+        transform: scale(0.96);
+      }
+      .repl-reset-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        line-height: 1;
+      }
+      .repl-reset-glyph {
+        display: inline-block;
+        font-size: 0.95em;
+        line-height: 1;
       }
 
       /* Terminal-style Braille spinner for the in-flight indicator.

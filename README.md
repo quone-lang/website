@@ -38,6 +38,14 @@ npm run serve:dist
 That preview server rewrites unknown paths back to `index.html`, so `/install`
 and any future SPA routes behave the same way they do on Netlify.
 
+Hero examples on the home page come from `website/snippets/*.Q`. The script
+`scripts/generate_examples_data.py` runs `quonec build` and overwrites
+`src/Content/ExamplesData.elm`. On hosts without `quonec` (including
+Netlify), the script keeps the last committed `ExamplesData.elm`. After
+changing snippets locally, build `quonec` in `../compiler` (or set
+`QUONEC` to the binary), then run `python3 scripts/generate_examples_data.py`
+from `website/`.
+
 For `elm reactor` during development:
 
 ```sh
@@ -79,12 +87,14 @@ npm test
 website/
   build.sh                   # canonical build command
   netlify.toml               # Netlify configuration
+  snippets/*.Q               # hero Quone sources (fed to quonec by the generator)
+  scripts/generate_examples_data.py
   static/index.html          # mounts the Elm program
   src/
     Main.elm                 # Browser.application entrypoint + routing
     Page/{Home,Install}.elm  # pages
     Ui/{Theme,Layout,CodeBlock,Button}.elm
-    Content/{Examples,Pitch}.elm
+    Content/{Examples,ExamplesData,Pitch}.elm
 ```
 
 The Quone keyword set used by `Ui/CodeBlock.elm` mirrors

@@ -8,16 +8,16 @@ A two-page Browser.application:
   - "/install" -> Page.Install
 
 Anything else falls through to a 404 element. Routing is intentionally
-trivial: there are only two pages, and `Browser.application` gives us
-real URLs for free (Netlify rewrites every path to /index.html so the
-SPA can resolve them).
+trivial: there are a handful of pages, and `Browser.application` gives
+us real URLs for free (Netlify rewrites every path to /index.html so
+the SPA can resolve them).
 
 -}
 
 import Browser
 import Browser.Events
 import Browser.Navigation as Nav
-import Element exposing (Element, fill, height, layout, width)
+import Element exposing (Element, fill, height, layout, map, width)
 import Element.Background as Background
 import Element.Font as Font
 import Json.Encode as Encode

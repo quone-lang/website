@@ -188,6 +188,22 @@ function ensureElmInstalled() {
   }
 }
 
+function generateExamplesData() {
+  const scriptPath = path.join(rootDir, "scripts", "generate_examples_data.py");
+  if (!fs.existsSync(scriptPath)) {
+    return;
+  }
+
+  const result = spawnSync("python3", [scriptPath], {
+    cwd: rootDir,
+    stdio: "inherit",
+  });
+
+  if (result.status !== 0) {
+    throw new Error("generate_examples_data.py failed.");
+  }
+}
+
 function compileElm() {
   const outputPath = path.join(distDir, "elm.js");
   const result = spawnSync(
@@ -211,6 +227,7 @@ function buildSite(reason) {
   fs.rmSync(distDir, { recursive: true, force: true });
   fs.mkdirSync(distDir, { recursive: true });
   fs.cpSync(staticDir, distDir, { recursive: true });
+  generateExamplesData();
   compileElm();
   replacePlaceholders(path.join(distDir, "index.html"), "elm.js");
 }
@@ -293,16 +310,20 @@ function createServer() {
 }
 
 function startWatcher() {
-  watcher = chokidar.watch(
-    [
-      path.join(rootDir, "elm.json"),
-      path.join(rootDir, "src"),
-      path.join(rootDir, "static"),
-    ],
-    {
-      ignoreInitial: true,
-    },
-  );
+  const watchPaths = [
+    path.join(rootDir, "elm.json"),
+    path.join(rootDir, "src"),
+    path.join(rootDir, "static"),
+  ];
+  const genScript = path.join(rootDir, "scripts", "generate_examples_data.py");
+  if (fs.existsSync(genScript)) {
+    watchPaths.push(path.join(rootDir, "snippets"));
+    watchPaths.push(genScript);
+  }
+
+  watcher = chokidar.watch(watchPaths, {
+    ignoreInitial: true,
+  });
 
   watcher.on("all", (eventName, changedPath) => {
     const relativePath = path.relative(rootDir, changedPath);
