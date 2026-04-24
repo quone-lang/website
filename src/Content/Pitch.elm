@@ -23,7 +23,7 @@ separately so it can crossfade between R and Q on hover.
 -}
 taglinePrefix : String
 taglinePrefix =
-    "Typed data pipelines that compile to"
+    "Typed data pipelines that"
 
 
 subtagline : String

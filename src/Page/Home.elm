@@ -349,12 +349,16 @@ heroSwapToken =
             [ Html.Attributes.class "hero-swap" ]
             [ Html.span
                 [ Html.Attributes.class "hero-swap-default" ]
-                [ Html.text "R" ]
+                [ Html.text "compile to R" ]
             , Html.span
                 [ Html.Attributes.class "hero-swap-alt"
                 , Html.Attributes.attribute "aria-hidden" "true"
                 ]
-                [ Html.text "Q" ]
+                [ Html.text "compile from "
+                , Html.span
+                    [ Html.Attributes.class "hero-swap-q" ]
+                    [ Html.text "Q" ]
+                ]
             ]
         )
 

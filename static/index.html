@@ -301,11 +301,12 @@
         min-height: 100%;
       }
 
-      /* Hero headline trailing-letter swap: the "R" crossfades into a
-         Quone-blue Bitcount-Grid "Q" when the hero heading is hovered. */
+      /* Hero headline swap: "compile to R" crossfades into
+         "compile from Q" when the hero heading is hovered. */
       .hero-swap {
         position: relative;
         display: inline-block;
+        min-width: 7.4em;
         white-space: nowrap;
       }
       .hero-swap-default,
@@ -321,10 +322,16 @@
         opacity: 0;
         color: var(--hero-swap-accent);
         pointer-events: none;
+        font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
+        font-weight: 600;
+        font-size: 1em;
+        line-height: 1;
+      }
+      .hero-swap-q {
         font-family: "Bitcount Grid Double", "JetBrains Mono", "JetBrains Mono Fallback", monospace;
         font-weight: 400;
         font-size: 1.2em;
-        line-height: 1;
+        line-height: 0;
       }
       .hero-swap:hover .hero-swap-default,
       h1:hover .hero-swap-default {
