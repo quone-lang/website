@@ -54,19 +54,19 @@ features =
     [ { title = "Typed data at the boundary"
       , body =
             "Validate CSV columns, missingness, and types before a dataframe enters the rest of your analysis."
-      , glyph = "R"
+      , glyph = "T"
       , accent = AccentPrimary
       }
     , { title = "Statically checked dplyr"
       , body =
             "Keep the familiar filter/mutate/summarize workflow while Quone checks columns, joins, and result shapes."
-      , glyph = "\u{03BB}"
+      , glyph = "\u{2713}"
       , accent = AccentSecondary
       }
     , { title = "Readable tidyverse R"
       , body =
             "Hand collaborators ordinary R built from dplyr, readr, purrr, and stringr. Low lock-in is part of the design."
-      , glyph = "\u{2713}"
+      , glyph = "R"
       , accent = AccentNeutral
       }
     ]
