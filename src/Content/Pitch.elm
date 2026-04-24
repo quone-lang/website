@@ -23,7 +23,7 @@ separately so it can crossfade between R and Q on hover.
 -}
 taglinePrefix : String
 taglinePrefix =
-    "Write safer data transformations for"
+    "Typed data pipelines that compile to"
 
 
 subtagline : String
@@ -57,7 +57,7 @@ features =
       , glyph = "R"
       , accent = AccentPrimary
       }
-    , { title = "dplyr-shaped, statically checked"
+    , { title = "Statically checked dplyr"
       , body =
             "Keep the familiar filter/mutate/summarize workflow while Quone checks columns, joins, and result shapes."
       , glyph = "\u{03BB}"

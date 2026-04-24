@@ -4,10 +4,10 @@ test("single page advertises the initial release workflow", async ({ page }) => 
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { name: "Write safer data transformations for R" }),
+    page.getByRole("heading", { name: "Typed data pipelines that compile to R" }),
   ).toBeVisible();
   await expect(page.getByText("Validate CSV columns")).toBeVisible();
-  await expect(page.getByText("dplyr-shaped, statically checked")).toBeVisible();
+  await expect(page.getByText("Statically checked dplyr")).toBeVisible();
   await expect(page.getByText("explicit Maybe-based missingness")).toBeVisible();
 });
 
