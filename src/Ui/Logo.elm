@@ -1,12 +1,6 @@
 module Ui.Logo exposing (full)
 
-{-| The Quone logo: a stylised "Q" set in Bitcount Grid Double (a
-distinctive grid/dot-matrix display face) followed by the lowercase
-"quone" wordmark in Space Grotesk.
-
-The grid font evokes early statistical computing without being kitsch;
-keeping it large beside a clean wordmark gives the brand a recognisable
-silhouette without needing an SVG.
+{-| The Quone logo lock-up.
 
 -}
 
@@ -15,10 +9,11 @@ import Element
         ( Element
         , centerY
         , el
-        , moveDown
+        , image
         , row
         , spacing
         , text
+        , width
         )
 import Element.Font as Font
 import Ui.Theme as Theme
@@ -27,19 +22,14 @@ import Ui.Theme as Theme
 {-| Just the "Q" mark, used for favicon-style placements.
 -}
 mark : Theme.Mode -> Int -> Element msg
-mark themeMode size =
-    let
-        colors =
-            Theme.paletteFor themeMode
-    in
-    el
-        [ Font.family Theme.fontLogo
-        , Font.color colors.primary
-        , Font.size size
-        , Font.regular
+mark _ size =
+    image
+        [ width (Element.px size)
         , centerY
         ]
-        (text "Q")
+        { src = "/q-logo.png"
+        , description = "Quone logo"
+        }
 
 
 {-| The full lock-up: "Q" mark plus the "quone" wordmark, sized for
@@ -55,7 +45,7 @@ full themeMode { wordmarkSize, markSize } =
         [ spacing 6
         , centerY
         ]
-        [ el [ centerY, moveDown 3 ] (mark themeMode markSize)
+        [ el [ centerY ] (mark themeMode markSize)
         , el
             [ Font.family Theme.fontDisplay
             , Font.color colors.textPrimary
