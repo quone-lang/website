@@ -23,12 +23,12 @@ separately so it can crossfade between R and Q on hover.
 -}
 taglinePrefix : String
 taglinePrefix =
-    "Typed dataframe workflows for"
+    "Write safer data transformations for"
 
 
 subtagline : String
 subtagline =
-    "Quone is an early language for technically inclined R users: typed CSV decoders, dplyr-style pipelines, explicit missing values, and readable R output."
+    "Quone is an early typed language for R users: write checked dataframe pipelines, then compile them to readable, maintainable R."
 
 
 
@@ -53,19 +53,19 @@ features : List Feature
 features =
     [ { title = "Typed data at the boundary"
       , body =
-            "Read CSVs through decoders that validate columns, missingness, and types before the dataframe enters your pipeline."
+            "Validate CSV columns, missingness, and types before a dataframe enters the rest of your analysis."
       , glyph = "R"
       , accent = AccentPrimary
       }
     , { title = "dplyr-shaped, statically checked"
       , body =
-            "Use familiar verbs like filter, mutate, summarize, group_by, joins, and arrange while Quone checks columns and result shapes."
+            "Keep the familiar filter/mutate/summarize workflow while Quone checks columns, joins, and result shapes."
       , glyph = "\u{03BB}"
       , accent = AccentSecondary
       }
     , { title = "Readable tidyverse R"
       , body =
-            "Generated code favors dplyr, readr, purrr, and stringr, so collaborators can inspect and run ordinary R."
+            "Hand collaborators ordinary R built from dplyr, readr, purrr, and stringr. Low lock-in is part of the design."
       , glyph = "\u{2713}"
       , accent = AccentNeutral
       }
@@ -78,6 +78,6 @@ features =
 
 whyQuone : List String
 whyQuone =
-    [ "Quone is for R users who want compiler help without giving up readable R. It focuses first on typed dataframe workflows: CSV decoding, dplyr-style transforms, grouped summaries, joins, and explicit Maybe-based missingness."
-    , "The initial release is intentionally small and early. APIs may change, VS Code is the supported editor target, and deferred features are left out so the core workflow can be coherent."
+    [ "Quone is for R users who want compiler help without giving up readable R. It focuses first on the work where scripts get brittle: CSV decoding, dplyr-style transforms, grouped summaries, joins, and explicit Maybe-based missingness."
+    , "The initial release is intentionally small and honest. APIs may change, VS Code is the supported editor target, and deferred features are left out so the happy path can be reliable."
     ]

@@ -4,11 +4,11 @@ test("single page advertises the initial release workflow", async ({ page }) => 
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { name: "Typed dataframe workflows for R" }),
+    page.getByRole("heading", { name: "Write safer data transformations for R" }),
   ).toBeVisible();
-  await expect(page.getByText("typed CSV decoders")).toBeVisible();
-  await expect(page.getByText("dplyr-style pipelines")).toBeVisible();
-  await expect(page.getByText("explicit missing values")).toBeVisible();
+  await expect(page.getByText("Validate CSV columns")).toBeVisible();
+  await expect(page.getByText("dplyr-shaped, statically checked")).toBeVisible();
+  await expect(page.getByText("explicit Maybe-based missingness")).toBeVisible();
 });
 
 test("getting started guide installs, writes, and compiles a demo", async ({ page }) => {
@@ -20,7 +20,7 @@ test("getting started guide installs, writes, and compiles a demo", async ({ pag
     }),
   ).toBeVisible();
   await expect(page.getByText('pak::pak("quone-lang/quone")')).toBeVisible();
-  await expect(page.getByText('quone::install_lsp("code")')).toBeVisible();
+  await expect(page.getByText("quone::install_lsp()")).toBeVisible();
   await expect(page.getByText('quone::write_demo()')).toBeVisible();
   await expect(page.getByText('quone::compile("mean_score.Q")')).toBeVisible();
   await expect(page.getByText('mean_score(c(10, 20, 30))')).toBeVisible();

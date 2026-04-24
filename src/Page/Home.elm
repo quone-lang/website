@@ -768,7 +768,7 @@ pak::pak("quone-lang/quone")
 
 # 2. Install the compiler and editor support.
 quone::install_compiler()
-quone::install_lsp("code")      # or "cursor" / "positron"
+quone::install_lsp()
 
 # 3. Write a bundled demo Quone file.
 quone::write_demo()

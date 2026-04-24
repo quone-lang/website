@@ -430,7 +430,7 @@ footer themeMode viewport =
 
         resourcesBlock =
             footerColumn themeMode "Resources"
-                [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE2.md"
+                [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
                   , "Language reference"
                   )
                 , ( "https://github.com/quone-lang/quone/tree/main/examples", "Examples" )

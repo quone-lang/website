@@ -93,10 +93,10 @@ website/
 ```
 
 The Quone keyword set used by `Ui/CodeBlock.elm` mirrors
-[LANGUAGE2.md section 3.4](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE2.md);
+[LANGUAGE.md section 3.4](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE.md);
 keep it in sync when the language adds keywords. The "boring R"
 design principle that drives the side-by-side examples is
-[LANGUAGE2.md section 1.2](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE2.md).
+[LANGUAGE.md section 1.2](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE.md).
 
 ## Sibling repos
 
