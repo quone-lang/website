@@ -4,18 +4,9 @@ module Content.Examples exposing
     , normalizeSnippet
     )
 
-{-| The Quone code samples shown on the marketing site.
-
-Use `Content.ExampleText.codeBlock` or `lines` so snippet text can be
-indented in this file without changing how it appears on the site.
-
--}
-
 import Content.ExampleText exposing (codeBlock)
 
 
-{-| A short Quone snippet shown in the hero "try it" tabs.
--}
 type alias Snippet =
     { filename : String
     , blurb : String
@@ -24,11 +15,6 @@ type alias Snippet =
     }
 
 
-{-| The full set of snippets featured in the hero tab strip, in display
-order. The first one is shown by default. Snippets are ordered by size:
-the smallest, easiest-to-read example sits on the left and they grow
-in length and richness as you move right.
--}
 heroSnippets : List Snippet
 heroSnippets =
     [ meanSnippet
@@ -40,8 +26,6 @@ heroSnippets =
     ]
 
 
-{-| Default when a snippet index is out of range (see `Page.Home`).
--}
 normalizeSnippet : Snippet
 normalizeSnippet =
     case heroSnippets of
@@ -55,19 +39,19 @@ normalizeSnippet =
 meanSnippet : Snippet
 meanSnippet =
     { filename = "mean.Q"
-    , blurb = ""
+    , blurb = "A small function with explicit numeric conversion."
     , quone =
         codeBlock
             """
-            mean : Vector Double -> Double
-            mean xs <-
-                sum xs / length xs
+            mean_score : Vector Double -> Double
+            mean_score xs <-
+                sum xs / to_double (length xs)
             """
     , r =
         codeBlock
             """
-            mean <- function(xs) {
-              sum(xs) / length(xs)
+            mean_score <- function(xs) {
+              sum(xs) / as.double(length(xs))
             }
             """
     }
@@ -76,25 +60,36 @@ meanSnippet =
 rmseSnippet : Snippet
 rmseSnippet =
     { filename = "rmse.Q"
-    , blurb = ""
+    , blurb = "Elementwise functions lift naturally over vectors."
     , quone =
         codeBlock
             """
             rmse : Vector Double -> Vector Double -> Double
             rmse actuals predictions <-
-                actuals
-                    |> map2 (\\p a -> (p - a) ^ 2) predictions
+                (predictions - actuals) ^ 2
                     |> mean
                     |> sqrt
+
+            actuals : Vector Double
+            actuals <- [2.1, 3.4, 4.0]
+
+            predictions : Vector Double
+            predictions <- [2.0, 3.7, 3.8]
+
+            error <- rmse actuals predictions
             """
     , r =
         codeBlock
             """
             rmse <- function(actuals, predictions) {
-              (predictions - actuals ^ 2) |>
+              (predictions - actuals) ^ 2 |>
                 mean() |>
                 sqrt()
             }
+
+            actuals <- c(2.1, 3.4, 4)
+            predictions <- c(2, 3.7, 3.8)
+            error <- rmse(actuals, predictions)
             """
     }
 
@@ -102,7 +97,7 @@ rmseSnippet =
 topScoresSnippet : Snippet
 topScoresSnippet =
     { filename = "top_scores.Q"
-    , blurb = ""
+    , blurb = "A dplyr-shaped pipeline with checked column names."
     , quone =
         codeBlock
             """
@@ -115,16 +110,18 @@ topScoresSnippet =
             top_scores : Students -> Students
             top_scores students <-
                 students
-                    |> filter { score >= 70.0 }
+                    |> filter (score >= 70)
                     |> arrange { desc score }
+                    |> select { name, score }
             """
     , r =
         codeBlock
             """
             top_scores <- function(students) {
               students |>
-                dplyr::filter(score >= 70.0) |>
-                dplyr::arrange(dplyr::desc(score))
+                dplyr::filter(score >= 70) |>
+                dplyr::arrange(dplyr::desc(score)) |>
+                dplyr::select(name, score)
             }
             """
     }
@@ -133,7 +130,7 @@ topScoresSnippet =
 scoreBandsSnippet : Snippet
 scoreBandsSnippet =
     { filename = "score_bands.Q"
-    , blurb = ""
+    , blurb = "Vectorized if keeps dataframe transforms readable."
     , quone =
         codeBlock
             """
@@ -159,13 +156,11 @@ scoreBandsSnippet =
         codeBlock
             """
             risk_band <- function(probability) {
-              if (probability >= 0.8) {
-                "high"
-              } else if (probability >= 0.5) {
-                "medium"
-              } else {
-                "low"
-              }
+              dplyr::case_when(
+                probability >= 0.8 ~ "high",
+                probability >= 0.5 ~ "medium",
+                .default = "low"
+              )
             }
 
             score_bands <- function(scores) {
@@ -180,7 +175,7 @@ scoreBandsSnippet =
 adslSummarySnippet : Snippet
 adslSummarySnippet =
     { filename = "adsl_summary.Q"
-    , blurb = ""
+    , blurb = "Grouped clinical summaries with reducers and vectorized conditions."
     , quone =
         codeBlock
             """
@@ -192,22 +187,13 @@ adslSummarySnippet =
                     , sex        : Vector Character
                     }
 
-            adsl_summary :
-                Adsl
-                -> dataframe
-                    { arm        : Vector Character
-                    , n_subjects : Vector Integer
-                    , mean_age   : Vector Double
-                    , pct_female : Vector Double
-                    }
-
             adsl_summary adsl <-
                 adsl
                     |> group_by { arm }
                     |> summarize
-                        { n_subjects = n
-                        , mean_age   = mean age
-                        , pct_female = mean (if sex == "F" then 1.0 else 0.0)
+                        { n_subjects = count subject_id
+                        , mean_age   = mean (to_double age)
+                        , pct_female = mean (if sex == "F" then 1 else 0)
                         }
                     |> arrange { arm }
             """
@@ -218,9 +204,10 @@ adslSummarySnippet =
               adsl |>
                 dplyr::group_by(arm) |>
                 dplyr::summarize(
-                  n_subjects = dplyr::n(),
-                  mean_age   = mean(age),
-                  pct_female = mean(ifelse(sex == "F", 1.0, 0.0))
+                  n_subjects = length(subject_id),
+                  mean_age = mean(as.double(age)),
+                  pct_female = mean(dplyr::if_else(sex == "F", 1, 0)),
+                  .groups = "drop"
                 ) |>
                 dplyr::arrange(arm)
             }
@@ -231,13 +218,13 @@ adslSummarySnippet =
 siteRollupSnippet : Snippet
 siteRollupSnippet =
     { filename = "site_rollup.Q"
-    , blurb = ""
+    , blurb = "A larger pipeline with a typed join, mutation, grouping, and ordered output."
     , quone =
         codeBlock
             """
-            disc_flag : Character -> Double
-            disc_flag status <-
-                if status == "DISCONTINUED" then 1.0 else 0.0
+            discontinued_flag : Character -> Double
+            discontinued_flag status <-
+                if status == "DISCONTINUED" then 1 else 0
 
             type alias Subjects <-
                 dataframe
@@ -248,48 +235,44 @@ siteRollupSnippet =
                     , response   : Vector Double
                     }
 
-            site_rollup :
-                Subjects
-                -> dataframe
-                    { site_id          : Vector Character
-                    , arm              : Vector Character
-                    , n_subjects       : Vector Integer
-                    , mean_response    : Vector Double
-                    , pct_discontinued : Vector Double
+            type alias Sites <-
+                dataframe
+                    { id     : Vector Character
+                    , region : Vector Character
                     }
 
-            site_rollup subjects <-
+            site_rollup subjects sites <-
                 subjects
-                    |> mutate { disc = disc_flag status }
-                    |> group_by { site_id, arm }
+                    |> left_join sites { site_id = id }
+                    |> mutate { discontinued = discontinued_flag status }
+                    |> group_by { region, arm }
                     |> summarize
-                        { n_subjects       = n
+                        { n_subjects       = count subject_id
                         , mean_response    = mean response
-                        , pct_discontinued = mean disc
+                        , pct_discontinued = mean discontinued
                         }
-                    |> arrange { site_id, arm }
+                    |> arrange { region, arm }
             """
     , r =
         codeBlock
             """
-            disc_flag <- function(status) {
-              if (status == "DISCONTINUED") {
-                1.0
-              } else {
-                0.0
-              }
+            discontinued_flag <- function(status) {
+              dplyr::if_else(status == "DISCONTINUED", 1, 0)
             }
 
-            site_rollup <- function(subjects) {
+            site_rollup <- function(subjects, sites) {
               subjects |>
-                dplyr::mutate(disc = disc_flag(status)) |>
-                dplyr::group_by(site_id, arm) |>
+                dplyr::left_join(sites, by = c("site_id" = "id")) |>
+                dplyr::mutate(discontinued = discontinued_flag(status)) |>
+                dplyr::group_by(region, arm) |>
                 dplyr::summarize(
-                  n_subjects       = dplyr::n(),
-                  mean_response    = mean(response),
-                  pct_discontinued = mean(disc)
+                  n_subjects = length(subject_id),
+                  mean_response = mean(response),
+                  pct_discontinued = mean(discontinued),
+                  .groups = "drop"
                 ) |>
-                dplyr::arrange(site_id, arm)
+                dplyr::arrange(region, arm)
             }
             """
     }
+

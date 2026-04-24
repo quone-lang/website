@@ -7,8 +7,8 @@
   publish = "dist/"
   command = "bash build.sh"
 
-# SPA routing: every URL serves index.html so Browser.application can
-# resolve /install (and any future routes) client-side without 404s.
+# Single-page routing: unknown URLs serve index.html so old links land on
+# the homepage rather than 404ing.
 [[redirects]]
   from = "/*"
   to = "/index.html"

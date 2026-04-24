@@ -5,7 +5,7 @@ a typed functional language that compiles to readable R.
 
 Built with [Elm 0.19.1](https://elm-lang.org) and
 [`elm-ui`](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/).
-The output is a static SPA -- one `index.html` plus one compiled
+The output is a static single-page site -- one `index.html` plus one compiled
 `elm.js` -- deployable on any static host.
 
 ## Develop
@@ -35,8 +35,7 @@ bash build.sh
 npm run serve:dist
 ```
 
-That preview server rewrites unknown paths back to `index.html`, so `/install`
-and any future SPA routes behave the same way they do on Netlify.
+That preview server serves the built single-page site from `dist/`.
 
 Hero examples on the home page come from `website/snippets/*.Q`. The script
 `scripts/generate_examples_data.py` runs `quonec build` and overwrites
@@ -64,16 +63,12 @@ repo ships with [`netlify.toml`](netlify.toml).
 | Build command       | `bash build.sh`|
 | Publish directory   | `dist/`        |
 
-For any other host, run `bash build.sh` and upload `dist/`. The host
-must rewrite unknown paths to `/index.html` so the SPA routes
-client-side (e.g. nginx `try_files $uri /index.html;`, or a
-`/* /index.html 200` line for Cloudflare Pages).
+For any other host, run `bash build.sh` and upload `dist/`.
 
 ## Tests
 
-The repo ships with a small Playwright smoke suite that covers the home
-page, install route, keyboard tab navigation, and the compact/mobile
-hero shell.
+The repo ships with a small Playwright smoke suite that covers the single-page
+copy, install section, navigation, and theme toggle.
 
 ```sh
 npm install
@@ -91,17 +86,17 @@ website/
   scripts/generate_examples_data.py
   static/index.html          # mounts the Elm program
   src/
-    Main.elm                 # Browser.application entrypoint + routing
-    Page/{Home,Install}.elm  # pages
+    Main.elm                 # Browser.document entrypoint
+    Page/Home.elm            # single page content
     Ui/{Theme,Layout,CodeBlock,Button}.elm
     Content/{Examples,ExamplesData,Pitch}.elm
 ```
 
 The Quone keyword set used by `Ui/CodeBlock.elm` mirrors
-[LANGUAGE.md section 3.4](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE.md);
+[LANGUAGE2.md section 3.4](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE2.md);
 keep it in sync when the language adds keywords. The "boring R"
 design principle that drives the side-by-side examples is
-[LANGUAGE.md section 1.2](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE.md).
+[LANGUAGE2.md section 1.2](https://github.com/quone-lang/compiler/blob/main/docs/LANGUAGE2.md).
 
 ## Sibling repos
 

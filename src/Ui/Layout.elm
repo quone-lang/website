@@ -117,9 +117,7 @@ header { themeMode, isFollowingSystem, viewport, currentPath, isMenuOpen, onTogg
             Theme.paletteFor themeMode
 
         navItems =
-            [ ( "/", "Home", Internal )
-            , ( "/install", "Install", Internal )
-            , ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md", "Reference", External )
+            [ ( "#install", "Install", Internal )
             , ( "https://github.com/quone-lang/quone", "GitHub", External )
             ]
 
@@ -430,29 +428,17 @@ footer themeMode viewport =
                 [ Logo.full themeMode { wordmarkSize = 18, markSize = 30 }
                 ]
 
-        projectBlock =
-            footerColumn themeMode "Project"
-                [ ( "https://github.com/quone-lang", "GitHub" )
-                , ( "https://github.com/quone-lang/quone/issues", "Issue tracker" )
-                ]
-
-        learnBlock =
-            footerColumn themeMode "Learn"
-                [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
+        resourcesBlock =
+            footerColumn themeMode "Resources"
+                [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE2.md"
                   , "Language reference"
                   )
                 , ( "https://github.com/quone-lang/quone/tree/main/examples", "Examples" )
-                ]
-
-        builtOnBlock =
-            footerColumn themeMode "Built on"
-                [ ( "https://www.r-project.org/", "R" )
-                , ( "https://www.haskell.org/", "Haskell" )
-                , ( "https://elm-lang.org/", "Elm" )
+                , ( "https://github.com/quone-lang/quone/issues", "Issue tracker" )
                 ]
 
         columns =
-            [ brandBlock, projectBlock, learnBlock, builtOnBlock ]
+            [ brandBlock, resourcesBlock ]
     in
     el
         [ width fill
@@ -497,7 +483,7 @@ footer themeMode viewport =
                 , Font.color colors.textMuted
                 , Font.size type_.smallSize
                 ]
-                [ text "Quone v0.0.1 - pre-release work in progress. APIs and syntax may change." ]
+                [ text "Quone initial release - pre-release work in progress. APIs and syntax may change." ]
             ]
         )
 

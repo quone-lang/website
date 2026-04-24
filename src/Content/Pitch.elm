@@ -23,12 +23,12 @@ separately so it can crossfade between R and Q on hover.
 -}
 taglinePrefix : String
 taglinePrefix =
-    "A typed functional language for"
+    "Typed dataframe workflows for"
 
 
 subtagline : String
 subtagline =
-    "Quone adds static guarantees to R workflows. Install the pre-release R package, call quone::compile() on a .Q file, and ship the readable R it emits."
+    "Quone is an early language for technically inclined R users: typed CSV decoders, dplyr-style pipelines, explicit missing values, and readable R output."
 
 
 
@@ -51,21 +51,21 @@ type alias Feature =
 
 features : List Feature
 features =
-    [ { title = "Lives inside R"
+    [ { title = "Typed data at the boundary"
       , body =
-            "Install the quone R package, call quone::compile() from your usual R session, and source the result. No new toolchain to manage."
+            "Read CSVs through decoders that validate columns, missingness, and types before the dataframe enters your pipeline."
       , glyph = "R"
       , accent = AccentPrimary
       }
-    , { title = "Typed pipelines"
+    , { title = "dplyr-shaped, statically checked"
       , body =
-            "Dataframe verbs stay dplyr-shaped, but column references and pipeline stages are checked before you ship."
+            "Use familiar verbs like filter, mutate, summarize, group_by, joins, and arrange while Quone checks columns and result shapes."
       , glyph = "\u{03BB}"
       , accent = AccentSecondary
       }
-    , { title = "Hand off plain R"
+    , { title = "Readable tidyverse R"
       , body =
-            "The output is ordinary R - no runtime wrapper - so collaborators who never touch Quone can still read, run, and package it."
+            "Generated code favors dplyr, readr, purrr, and stringr, so collaborators can inspect and run ordinary R."
       , glyph = "\u{2713}"
       , accent = AccentNeutral
       }
@@ -78,6 +78,6 @@ features =
 
 whyQuone : List String
 whyQuone =
-    [ "Quone is for R users who want compiler help without leaving R. The quone package installs from GitHub today and exposes a single quone::compile() function; everything else is R."
-    , "v0.0.1 is early, but already useful for teams that want more confidence around pipelines, functions, and package-ready output."
+    [ "Quone is for R users who want compiler help without giving up readable R. It focuses first on typed dataframe workflows: CSV decoding, dplyr-style transforms, grouped summaries, joins, and explicit Maybe-based missingness."
+    , "The initial release is intentionally small and early. APIs may change, VS Code is the supported editor target, and deferred features are left out so the core workflow can be coherent."
     ]

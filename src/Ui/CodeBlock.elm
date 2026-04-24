@@ -8,7 +8,7 @@ module Ui.CodeBlock exposing
 {-| Syntax-highlighted code blocks for Quone and R.
 
 Highlighting is hand-rolled rather than pulled from a library: Quone's
-keyword set is small (LANGUAGE.md section 3.4) and the entire site's
+keyword set is small (LANGUAGE2.md section 3.4) and the entire site's
 syntax-highlighting needs are covered by a few hundred lines of pure
 Elm. R highlighting follows the same shape, with R-specific tokens
 (`<-`, `%%`, `%/%`, `TRUE`/`FALSE`/`NULL`, etc.).
@@ -557,7 +557,7 @@ keywordSet lang =
     case lang of
         Quone ->
             Set.fromList
-                -- Framework keywords (LANGUAGE.md section 3.4)
+                -- Framework keywords (LANGUAGE2.md section 3.4)
                 [ "module"
                 , "exporting"
                 , "type"
@@ -581,30 +581,13 @@ keywordSet lang =
                 , "ungroup"
                 , "arrange"
                 , "rename"
-                , "distinct"
-                , "distinct_all"
-                , "count"
-                , "slice"
-                , "pull"
-                , "relocate"
-                , "transmute"
-                , "mutate_each"
-                , "summarize_each"
                 , "left_join"
                 , "right_join"
                 , "inner_join"
-                , "full_join"
-                , "anti_join"
-                , "semi_join"
-                , "cross_join"
 
                 -- Modifier keywords
                 , "desc"
                 , "asc"
-                , "on"
-                , "as"
-                , "where"
-                , "cols"
                 ]
 
         R ->

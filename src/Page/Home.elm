@@ -13,7 +13,8 @@ Layout, top to bottom:
 1.  Hero - tagline, subtagline, CTAs, and an interactive REPL where the
     user can pick a Quone snippet and "compile" it to R.
 2.  Why Quone - three accent cards summarising the value prop.
-3.  Status - pre-release note + closing CTAs.
+3.  Getting started - install, editor setup, demo file, and compile workflow.
+4.  Status - pre-release note.
 
 -}
 
@@ -33,7 +34,6 @@ import Element
         , padding
         , paddingEach
         , paragraph
-        , row
         , shrink
         , spacing
         , text
@@ -263,6 +263,7 @@ view themeMode viewport heroState =
         [ width fill, spacing (sectionSpacing viewport) ]
         [ heroSection themeMode viewport heroState
         , featuresSection themeMode viewport
+        , installSection themeMode viewport
         , closingSection themeMode viewport
         ]
 
@@ -298,17 +299,15 @@ heroText themeMode viewport =
         colors =
             Theme.paletteFor themeMode
 
-        actions =
-            [ Button.linkPrimary themeMode { url = "/install", label = "Install the R package" }
-            , Button.linkSecondary themeMode { url = "https://github.com/quone-lang", label = "View on GitHub" }
-            ]
+        action =
+            Button.linkPrimary themeMode { url = "#install", label = "Install the R package" }
     in
     column
         [ centerX
         , spacing Theme.space.lg
         , width (fill |> maximum 920)
         ]
-        [ kicker themeMode "v0.0.1 WIP"
+        [ kicker themeMode "early release"
         , paragraph
             [ Font.size (heroDisplaySize viewport)
             , Font.semiBold
@@ -335,21 +334,11 @@ heroText themeMode viewport =
             , centerX
             ]
             [ text Pitch.subtagline ]
-        , if Viewport.isCompact viewport then
-            column
-                [ centerX
-                , spacing Theme.space.md
-                , paddingEach { top = Theme.space.md, right = 0, bottom = 0, left = 0 }
-                ]
-                (List.map (\button -> el [ centerX ] button) actions)
-
-          else
-            row
-                [ centerX
-                , spacing Theme.space.md
-                , paddingEach { top = Theme.space.md, right = 0, bottom = 0, left = 0 }
-                ]
-                actions
+        , el
+            [ centerX
+            , paddingEach { top = Theme.space.md, right = 0, bottom = 0, left = 0 }
+            ]
+            action
         ]
 
 
@@ -746,43 +735,64 @@ accentColors themeMode accent =
             ( colors.codeSurface, colors.textPrimary )
 
 
+installSection : Theme.Mode -> Viewport.Viewport -> Element msg_
+installSection themeMode viewport =
+    let
+        colors =
+            Theme.paletteFor themeMode
+    in
+    Layout.section themeMode viewport
+        { kicker = Just "Getting started"
+        , title = Just "Install Quone, write a demo file, and compile it."
+        , body =
+            column
+                [ width fill
+                , spacing Theme.space.lg
+                , htmlAttribute (Html.Attributes.id "install")
+                ]
+                [ paragraph
+                    [ Font.size type_.bodyLargeSize
+                    , Font.color colors.textSecondary
+                    , Element.spacing 6
+                    , width (fill |> maximum 760)
+                    ]
+                    [ text "Start in R. Install the "
+                    , CodeBlock.viewInline themeMode "quone"
+                    , text " package, let it install the compiler and VS Code-compatible language server, then have it write and compile a tiny bundled "
+                    , CodeBlock.viewInline themeMode ".Q"
+                    , text " file."
+                    ]
+                , CodeBlock.view themeMode viewport CodeBlock.R """# 1. Install the R package.
+install.packages("pak")
+pak::pak("quone-lang/quone")
+
+# 2. Install the compiler and editor support.
+quone::install_compiler()
+quone::install_lsp("code")      # or "cursor" / "positron"
+
+# 3. Write a bundled demo Quone file.
+quone::write_demo()
+
+# 4. Check and compile it to readable R.
+quone::check("mean_score.Q")
+quone::compile("mean_score.Q")
+
+# 5. Run the generated R.
+source("mean_score.R")
+mean_score(c(10, 20, 30))"""
+                , Button.linkSecondary themeMode
+                    { url = "https://github.com/quone-lang/quone"
+                    , label = "R package details"
+                    }
+                ]
+        }
+
 
 -- CLOSING
 
 
 closingSection : Theme.Mode -> Viewport.Viewport -> Element msg_
 closingSection themeMode viewport =
-    let
-        primaryAction =
-            Button.linkPrimary themeMode { url = "/install", label = "Install the R package" }
-
-        secondaryAction =
-            Button.linkSecondary themeMode
-                { url = "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
-                , label = "Language reference"
-                }
-
-        actionRow =
-            if Viewport.isCompact viewport then
-                column
-                    [ centerX
-                    , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
-                    , spacing Theme.space.md
-                    ]
-                    [ el [ centerX ] primaryAction
-                    , el [ centerX ] secondaryAction
-                    ]
-
-            else
-                row
-                    [ centerX
-                    , paddingEach { top = Theme.space.lg, right = 0, bottom = 0, left = 0 }
-                    , spacing Theme.space.md
-                    ]
-                    [ primaryAction
-                    , secondaryAction
-                    ]
-    in
     Layout.section themeMode viewport
         { kicker = Just "Status"
         , title = Just "Early, useful, and still small enough to learn fast."
@@ -792,7 +802,7 @@ closingSection themeMode viewport =
                 , centerX
                 , spacing Theme.space.lg
                 ]
-                (List.map (prose themeMode) Pitch.whyQuone ++ [ actionRow ])
+                (List.map (prose themeMode) Pitch.whyQuone)
         }
 
 
