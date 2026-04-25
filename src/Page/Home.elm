@@ -758,8 +758,10 @@ installSection themeMode viewport =
                 [ paragraph
                     [ Font.size type_.bodyLargeSize
                     , Font.color colors.textSecondary
+                    , Font.center
                     , Element.spacing 6
                     , width (fill |> maximum 760)
+                    , centerX
                     ]
                     [ text "Start in R. Install the "
                     , CodeBlock.viewInline themeMode "quone"
@@ -767,16 +769,22 @@ installSection themeMode viewport =
                     , CodeBlock.viewInline themeMode ".Q"
                     , text " file, then compiles and opens the generated R."
                     ]
-                , CodeBlock.view themeMode viewport CodeBlock.R """# Install the R package.
+                , el
+                    [ width (fill |> maximum 760)
+                    , centerX
+                    ]
+                    (CodeBlock.view themeMode viewport CodeBlock.R """# Install the R package.
 install.packages("pak")
 pak::pak("quone-lang/quone")
 
 # Start the guided first run.
-quone::start()"""
-                , Button.linkSecondary themeMode
-                    { url = "https://github.com/quone-lang/quone"
-                    , label = "R package details"
-                    }
+quone::start()""")
+                , el [ centerX ]
+                    (Button.linkSecondary themeMode
+                        { url = "https://github.com/quone-lang/quone"
+                        , label = "R package details"
+                        }
+                    )
                 ]
         }
 
