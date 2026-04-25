@@ -306,10 +306,12 @@
       .hero-swap {
         position: relative;
         display: inline-block;
-        width: 7.9em;
+        width: 6.45em;
         white-space: nowrap;
         text-align: left;
         vertical-align: baseline;
+        transition: width 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+        will-change: width;
       }
       .hero-swap-default,
       .hero-swap-alt {
@@ -317,8 +319,7 @@
         transform-origin: left center;
         transition:
           opacity 160ms ease,
-          transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
-          clip-path 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+          transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
       }
       .hero-swap-alt {
         position: absolute;
@@ -332,7 +333,6 @@
         font-weight: inherit;
         font-size: 1em;
         line-height: 1;
-        clip-path: inset(0 100% 0 0);
       }
       .hero-swap-q {
         font-family: "Bitcount Grid Double", "JetBrains Mono", "JetBrains Mono Fallback", monospace;
@@ -346,13 +346,17 @@
         opacity: 0;
         transform: translateY(-0.08em);
       }
+      .hero-swap:hover,
+      h1:hover .hero-swap {
+        width: 7.9em;
+      }
       .hero-swap:hover .hero-swap-alt,
       h1:hover .hero-swap-alt {
         opacity: 1;
         transform: translateY(-50%) translateX(0);
-        clip-path: inset(0 0 0 0);
       }
       @media (prefers-reduced-motion: reduce) {
+        .hero-swap,
         .hero-swap-default,
         .hero-swap-alt {
           transition: none;
