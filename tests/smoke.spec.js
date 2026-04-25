@@ -11,19 +11,16 @@ test("single page advertises the initial release workflow", async ({ page }) => 
   await expect(page.getByText("explicit Maybe-based missingness")).toBeVisible();
 });
 
-test("getting started guide installs, writes, and compiles a demo", async ({ page }) => {
+test("getting started guide installs and starts the guided setup", async ({ page }) => {
   await page.goto("/#install");
 
   await expect(
     page.getByRole("heading", {
-      name: "Install Quone, write a demo file, and compile it.",
+      name: "Install Quone, then run the guided setup.",
     }),
   ).toBeVisible();
   await expect(page.getByText('pak::pak("quone-lang/quone")')).toBeVisible();
-  await expect(page.getByText("quone::install_lsp()")).toBeVisible();
-  await expect(page.getByText('quone::write_demo()')).toBeVisible();
-  await expect(page.getByText('quone::compile("mean_score.Q")')).toBeVisible();
-  await expect(page.getByText('mean_score(c(10, 20, 30))')).toBeVisible();
+  await expect(page.getByText("quone::start()")).toBeVisible();
   await expect(
     page.getByRole("link", { name: "R package details" }),
   ).toHaveAttribute("href", "https://github.com/quone-lang/quone");
@@ -37,6 +34,10 @@ test("single page keeps lean install and github navigation", async ({ page, isMo
   }
 
   await expect(page.getByRole("link", { name: "Install", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "Examples", exact: true }).first()).toHaveAttribute(
+    "href",
+    "https://github.com/quone-lang/examples",
+  );
   await expect(page.getByRole("link", { name: "GitHub", exact: true }).first()).toHaveAttribute(
     "href",
     "https://github.com/quone-lang",

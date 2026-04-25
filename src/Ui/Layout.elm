@@ -118,6 +118,7 @@ header { themeMode, isFollowingSystem, viewport, currentPath, isMenuOpen, onTogg
 
         navItems =
             [ ( "#install", "Install", Internal )
+            , ( "https://github.com/quone-lang/examples", "Examples", External )
             , ( "https://github.com/quone-lang", "GitHub", External )
             ]
 
@@ -433,7 +434,7 @@ footer themeMode viewport =
                 [ ( "https://github.com/quone-lang/quone/blob/main/compiler/docs/LANGUAGE.md"
                   , "Language reference"
                   )
-                , ( "https://github.com/quone-lang/quone/tree/main/examples", "Examples" )
+                , ( "https://github.com/quone-lang/examples", "Examples" )
                 , ( "https://github.com/quone-lang/quone/issues", "Issue tracker" )
                 ]
 

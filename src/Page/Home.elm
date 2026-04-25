@@ -747,7 +747,7 @@ installSection themeMode viewport =
     in
     Layout.section themeMode viewport
         { kicker = Just "Getting started"
-        , title = Just "Install Quone, write a demo file, and compile it."
+        , title = Just "Install Quone, then run the guided setup."
         , body =
             column
                 [ width fill
@@ -762,28 +762,16 @@ installSection themeMode viewport =
                     ]
                     [ text "Start in R. Install the "
                     , CodeBlock.viewInline themeMode "quone"
-                    , text " package, let it install the compiler and VS Code-compatible language server, then have it write and compile a tiny bundled "
+                    , text " package, then run one guided command. It explains each step, asks permission, installs the compiler and VS Code-compatible language server, writes and opens a tiny bundled "
                     , CodeBlock.viewInline themeMode ".Q"
-                    , text " file."
+                    , text " file, then compiles and opens the generated R."
                     ]
-                , CodeBlock.view themeMode viewport CodeBlock.R """# 1. Install the R package.
+                , CodeBlock.view themeMode viewport CodeBlock.R """# Install the R package.
 install.packages("pak")
 pak::pak("quone-lang/quone")
 
-# 2. Install the compiler and editor support.
-quone::install_compiler()
-quone::install_lsp()
-
-# 3. Write a bundled demo Quone file.
-quone::write_demo()
-
-# 4. Check and compile it to readable R.
-quone::check("mean_score.Q")
-quone::compile("mean_score.Q")
-
-# 5. Run the generated R.
-source("mean_score.R")
-mean_score(c(10, 20, 30))"""
+# Start the guided first run.
+quone::start()"""
                 , Button.linkSecondary themeMode
                     { url = "https://github.com/quone-lang/quone"
                     , label = "R package details"

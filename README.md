@@ -65,6 +65,24 @@ repo ships with [`netlify.toml`](netlify.toml).
 
 For any other host, run `bash build.sh` and upload `dist/`.
 
+## Social card
+
+`static/social-card-share.png` (the OG image referenced from
+`static/index.html`) is rendered from `src/SocialCard.elm`, which
+reuses the same theme, fonts, and `Ui.CodeBlock` highlighter as the
+rest of the site. To regenerate it after a brand or copy change:
+
+```sh
+npm install
+npx playwright install chromium  # first time only
+node scripts/render-social-card.cjs
+```
+
+The script compiles `SocialCard.elm`, mounts it on a temporary 1200x630
+page with the self-hosted woff2 fonts inlined as data URIs, and
+screenshots the result via Playwright's bundled Chromium. Commit the
+updated PNG.
+
 ## Tests
 
 The repo ships with a small Playwright smoke suite that covers the single-page
@@ -84,9 +102,11 @@ website/
   netlify.toml               # Netlify configuration
   snippets/*.Q               # hero Quone sources (fed to quonec by the generator)
   scripts/generate_examples_data.py
+  scripts/render-social-card.cjs   # screenshots SocialCard.elm into static/social-card-share.png
   static/index.html          # mounts the Elm program
   src/
     Main.elm                 # Browser.document entrypoint
+    SocialCard.elm           # 1200x630 social card (rendered to PNG, see Social card section)
     Page/Home.elm            # single page content
     Ui/{Theme,Layout,CodeBlock,Button}.elm
     Content/{Examples,ExamplesData,Pitch}.elm
