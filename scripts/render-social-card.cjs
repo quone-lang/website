@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Render the Quone social card to static/social-card-share.png.
+/* Render the Quone social card to static/social-card-share-20260425.png.
  *
  * The card is built from src/SocialCard.elm so it shares the same
  * theme, font stack, and code highlighter as the marketing site
@@ -19,7 +19,9 @@ const { chromium } = require("playwright");
 const ROOT = path.resolve(__dirname, "..");
 const STATIC = path.join(ROOT, "static");
 const FONTS = path.join(STATIC, "fonts");
-const PNG_PATH = path.join(STATIC, "social-card-share.png");
+const SOCIAL_CARD_FILENAME = "social-card-share-20260425.png";
+const PNG_PATH = path.join(STATIC, SOCIAL_CARD_FILENAME);
+const LEGACY_PNG_PATH = path.join(STATIC, "social-card-share.png");
 const ELM_BIN = path.join(ROOT, "node_modules", ".bin", "elm");
 
 function ensureElm() {
@@ -145,7 +147,9 @@ async function render(html) {
   });
 
   await browser.close();
+  fs.copyFileSync(PNG_PATH, LEGACY_PNG_PATH);
   console.log(`Wrote ${path.relative(ROOT, PNG_PATH)}`);
+  console.log(`Updated ${path.relative(ROOT, LEGACY_PNG_PATH)} for local previews`);
 }
 
 async function main() {
