@@ -118,7 +118,7 @@ header { themeMode, isFollowingSystem, viewport, currentPath, isMenuOpen, onTogg
 
         navItems =
             [ ( "#install", "Install", Internal )
-            , ( "https://github.com/quone-lang/quone", "GitHub", External )
+            , ( "https://github.com/quone-lang", "GitHub", External )
             ]
 
         contentPadding =

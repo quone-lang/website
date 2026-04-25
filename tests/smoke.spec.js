@@ -37,7 +37,10 @@ test("single page keeps lean install and github navigation", async ({ page, isMo
   }
 
   await expect(page.getByRole("link", { name: "Install", exact: true }).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: "GitHub", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: "GitHub", exact: true }).first()).toHaveAttribute(
+    "href",
+    "https://github.com/quone-lang",
+  );
   await expect(page.getByRole("link", { name: "Features", exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Spec", exact: true })).toHaveCount(0);
 });
