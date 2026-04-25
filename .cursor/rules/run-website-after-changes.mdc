@@ -1,0 +1,14 @@
+---
+description: Run the website after making website changes
+globs: **/*
+alwaysApply: false
+---
+
+# Website Change Verification
+
+When a user asks for a change to the website, run the website after the edits are done and before the final response.
+
+- Work from the `website/` directory.
+- Use the existing scripts in `package.json`; prefer `npm run dev` for a local interactive check, or `npm run build` plus `npm run serve:dist` when production output is what matters.
+- If a website server is already running, reuse it instead of starting a duplicate.
+- Verify the page loads successfully, and mention the command or blocker in the final response.
