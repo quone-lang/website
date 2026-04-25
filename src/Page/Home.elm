@@ -763,7 +763,7 @@ installSection themeMode viewport =
                     ]
                     [ text "Start in R. Install the "
                     , CodeBlock.viewInline themeMode "quone"
-                    , text " package, then run one guided command. It installs the compiler and VS Code-compatible language server, writes and opens a tiny bundled "
+                    , text " package, then run one guided command. Quone currently works in Positron and Cursor: the command installs the compiler and VS Code-compatible language server, writes and opens a tiny bundled "
                     , CodeBlock.viewInline themeMode ".Q"
                     , text " file, then compiles and opens the generated R."
                     ]
