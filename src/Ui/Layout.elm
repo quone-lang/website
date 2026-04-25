@@ -475,16 +475,16 @@ footer themeMode viewport =
                 none
             , paragraph
                 -- `paragraph` not `el`: on iPhone (390px viewport) the
-                -- single 78-character pre-release banner reports its
-                -- content width to the layout, pushing the page wider
-                -- than the viewport. `paragraph` wraps to multiple
-                -- lines and the page width stays bounded.
+                -- pre-release note reports its content width to the
+                -- layout, pushing the page wider than the viewport.
+                -- `paragraph` wraps to multiple lines and the page
+                -- width stays bounded.
                 [ alignLeft
                 , width fill
                 , Font.color colors.textMuted
                 , Font.size type_.smallSize
                 ]
-                [ text "Quone is experimental pre-release software. APIs, syntax, and tooling may change." ]
+                [ text "Pre-release: APIs and syntax may change before 1.0." ]
             ]
         )
 

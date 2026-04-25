@@ -176,7 +176,7 @@ view model =
         colors =
             Theme.paletteFor model.themeMode
     in
-    { title = "Quone - typed dataframe workflows for R"
+    { title = "Quone - typed dataframe pipelines for R"
     , body =
         [ layout
             [ width fill

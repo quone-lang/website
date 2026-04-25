@@ -2,7 +2,7 @@
   "name": "quone-website",
   "version": "0.0.1",
   "private": true,
-  "description": "Marketing site for Quone, experimental pre-release software that compiles to readable R.",
+  "description": "Marketing site for Quone, a typed language for R users with checked dataframe pipelines.",
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "chokidar": "^5.0.0"

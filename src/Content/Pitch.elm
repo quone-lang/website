@@ -28,7 +28,7 @@ taglinePrefix =
 
 subtagline : String
 subtagline =
-    "Quone is experimental pre-release software for R users: try checked dataframe pipelines today, with APIs and syntax still expected to change."
+    "Write typed dataframe pipelines for R: decode CSVs into known shapes, use dplyr-style verbs, model missing values with Maybe, and compile to readable tidyverse code."
 
 
 
@@ -51,21 +51,21 @@ type alias Feature =
 
 features : List Feature
 features =
-    [ { title = "Typed data at the boundary"
+    [ { title = "Typed CSV schemas"
       , body =
-            "Validate CSV columns, missingness, and types before a dataframe enters the rest of your analysis."
+            "Describe incoming columns once, then let Quone check names, types, and missingness before data reaches the rest of your analysis."
       , glyph = "T"
       , accent = AccentPrimary
       }
-    , { title = "Statically checked dplyr"
+    , { title = "Checked dataframe verbs"
       , body =
-            "Keep the familiar filter/mutate/summarize workflow while Quone checks columns, joins, and result shapes."
+            "Use filter, mutate, summarize, joins, grouping, and ordering with compiler feedback about columns and result shapes."
       , glyph = "\u{2713}"
       , accent = AccentSecondary
       }
-    , { title = "Readable tidyverse R"
+    , { title = "Readable R output"
       , body =
-            "Hand collaborators ordinary R built from dplyr, readr, purrr, and stringr. Low lock-in is part of the design."
+            "Compile to ordinary tidyverse code built from dplyr, readr, purrr, and stringr, so collaborators can inspect and run the result."
       , glyph = "R"
       , accent = AccentNeutral
       }
@@ -78,6 +78,6 @@ features =
 
 whyQuone : List String
 whyQuone =
-    [ "Quone is an experimental pre-release for R users who want compiler help without giving up readable R. It focuses first on the work where scripts get brittle: CSV decoding, dplyr-style transforms, grouped summaries, joins, and explicit Maybe-based missingness."
-    , "The current build is intentionally small and honest. APIs and syntax may change, VS Code is the supported editor target, and deferred features are left out while the happy path is still being proven."
+    [ "Quone combines Hindley-Milner inference, custom types, typed dataframe shapes, and explicit Maybe-based missingness with a pipeline syntax that should feel familiar to R users."
+    , "It focuses first on the brittle parts of analysis scripts: validating CSV inputs, keeping column names and types in sync through transforms, checking grouped summaries and joins, and producing R that stays close to the source."
     ]

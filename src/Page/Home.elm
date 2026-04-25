@@ -12,9 +12,10 @@ Layout, top to bottom:
 
 1.  Hero - tagline, subtagline, CTAs, and an interactive REPL where the
     user can pick a Quone snippet and "compile" it to R.
-2.  Why Quone - three accent cards summarising the value prop.
+2.  Language features - three accent cards summarising Quone's typed
+    dataframe workflow.
 3.  Getting started - install, editor setup, demo file, and compile workflow.
-4.  Status - pre-release note.
+4.  How it works - language model and feature details.
 
 -}
 
@@ -659,8 +660,8 @@ tabGap viewport =
 featuresSection : Theme.Mode -> Viewport.Viewport -> Element msg_
 featuresSection themeMode viewport =
     Layout.section themeMode viewport
-        { kicker = Just "Why Quone"
-        , title = Just "Compiler help without giving up R."
+        { kicker = Just "Language features"
+        , title = Just "Typed dataframe work, checked end to end."
         , body =
             wrappedRow
                 [ width fill
@@ -747,7 +748,7 @@ installSection themeMode viewport =
     in
     Layout.section themeMode viewport
         { kicker = Just "Getting started"
-        , title = Just "Try the pre-release, then run the guided setup."
+        , title = Just "Install from R and compile a .Q file."
         , body =
             column
                 [ width fill
@@ -760,9 +761,9 @@ installSection themeMode viewport =
                     , Element.spacing 6
                     , width (fill |> maximum 760)
                     ]
-                    [ text "Start in R. Install the experimental "
+                    [ text "Start in R. Install the "
                     , CodeBlock.viewInline themeMode "quone"
-                    , text " package, then run one guided command. It explains each step, asks permission, installs the pre-release compiler and VS Code-compatible language server, writes and opens a tiny bundled "
+                    , text " package, then run one guided command. It installs the compiler and VS Code-compatible language server, writes and opens a tiny bundled "
                     , CodeBlock.viewInline themeMode ".Q"
                     , text " file, then compiles and opens the generated R."
                     ]
@@ -786,8 +787,8 @@ quone::start()"""
 closingSection : Theme.Mode -> Viewport.Viewport -> Element msg_
 closingSection themeMode viewport =
     Layout.section themeMode viewport
-        { kicker = Just "Status"
-        , title = Just "Experimental, useful, and still small enough to learn fast."
+        { kicker = Just "How it works"
+        , title = Just "Schemas, verbs, and missingness are part of the language."
         , body =
             column
                 [ width (fill |> maximum 760)

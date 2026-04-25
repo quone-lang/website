@@ -172,7 +172,7 @@ headline =
             , Font.center
             , Element.htmlAttribute (htmlStyle "line-height" "1.05")
             ]
-            [ text "Experimental typed pipelines that compile to "
+            [ text "Typed dataframe pipelines that compile to "
             , el [ Font.color accentColor ] (text "R.")
             ]
         ]
