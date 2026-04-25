@@ -28,7 +28,7 @@ taglinePrefix =
 
 subtagline : String
 subtagline =
-    "Quone is an early typed language for R users: write checked dataframe pipelines, then compile them to readable, maintainable R."
+    "Quone is experimental pre-release software for R users: try checked dataframe pipelines today, with APIs and syntax still expected to change."
 
 
 
@@ -78,6 +78,6 @@ features =
 
 whyQuone : List String
 whyQuone =
-    [ "Quone is for R users who want compiler help without giving up readable R. It focuses first on the work where scripts get brittle: CSV decoding, dplyr-style transforms, grouped summaries, joins, and explicit Maybe-based missingness."
-    , "The initial release is intentionally small and honest. APIs may change, VS Code is the supported editor target, and deferred features are left out so the happy path can be reliable."
+    [ "Quone is an experimental pre-release for R users who want compiler help without giving up readable R. It focuses first on the work where scripts get brittle: CSV decoding, dplyr-style transforms, grouped summaries, joins, and explicit Maybe-based missingness."
+    , "The current build is intentionally small and honest. APIs and syntax may change, VS Code is the supported editor target, and deferred features are left out while the happy path is still being proven."
     ]

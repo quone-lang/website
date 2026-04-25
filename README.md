@@ -1,7 +1,7 @@
 # quone-lang.org
 
 The marketing site for [Quone](https://github.com/quone-lang/compiler),
-a typed functional language that compiles to readable R.
+experimental pre-release software that compiles to readable R.
 
 Built with [Elm 0.19.1](https://elm-lang.org) and
 [`elm-ui`](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/).

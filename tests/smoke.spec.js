@@ -1,11 +1,12 @@
 const { test, expect } = require("@playwright/test");
 
-test("single page advertises the initial release workflow", async ({ page }) => {
+test("single page advertises the experimental pre-release workflow", async ({ page }) => {
   await page.goto("/");
 
   await expect(
     page.getByRole("heading", { name: "Typed data pipelines that compile to R" }),
   ).toBeVisible();
+  await expect(page.getByText("experimental pre-release software").first()).toBeVisible();
   await expect(page.getByText("Validate CSV columns")).toBeVisible();
   await expect(page.getByText("Statically checked dplyr")).toBeVisible();
   await expect(page.getByText("explicit Maybe-based missingness")).toBeVisible();
@@ -16,7 +17,7 @@ test("getting started guide installs and starts the guided setup", async ({ page
 
   await expect(
     page.getByRole("heading", {
-      name: "Install Quone, then run the guided setup.",
+      name: "Try the pre-release, then run the guided setup.",
     }),
   ).toBeVisible();
   await expect(page.getByText('pak::pak("quone-lang/quone")')).toBeVisible();

@@ -484,7 +484,7 @@ footer themeMode viewport =
                 , Font.color colors.textMuted
                 , Font.size type_.smallSize
                 ]
-                [ text "Quone initial release - pre-release work in progress. APIs and syntax may change." ]
+                [ text "Quone is experimental pre-release software. APIs, syntax, and tooling may change." ]
             ]
         )
 

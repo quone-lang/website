@@ -307,7 +307,7 @@ heroText themeMode viewport =
         , spacing Theme.space.lg
         , width (fill |> maximum 920)
         ]
-        [ kicker themeMode "early release"
+        [ kicker themeMode "experimental pre-release"
         , paragraph
             [ Font.size (heroDisplaySize viewport)
             , Font.semiBold
@@ -747,7 +747,7 @@ installSection themeMode viewport =
     in
     Layout.section themeMode viewport
         { kicker = Just "Getting started"
-        , title = Just "Install Quone, then run the guided setup."
+        , title = Just "Try the pre-release, then run the guided setup."
         , body =
             column
                 [ width fill
@@ -760,9 +760,9 @@ installSection themeMode viewport =
                     , Element.spacing 6
                     , width (fill |> maximum 760)
                     ]
-                    [ text "Start in R. Install the "
+                    [ text "Start in R. Install the experimental "
                     , CodeBlock.viewInline themeMode "quone"
-                    , text " package, then run one guided command. It explains each step, asks permission, installs the compiler and VS Code-compatible language server, writes and opens a tiny bundled "
+                    , text " package, then run one guided command. It explains each step, asks permission, installs the pre-release compiler and VS Code-compatible language server, writes and opens a tiny bundled "
                     , CodeBlock.viewInline themeMode ".Q"
                     , text " file, then compiles and opens the generated R."
                     ]
@@ -787,7 +787,7 @@ closingSection : Theme.Mode -> Viewport.Viewport -> Element msg_
 closingSection themeMode viewport =
     Layout.section themeMode viewport
         { kicker = Just "Status"
-        , title = Just "Early, useful, and still small enough to learn fast."
+        , title = Just "Experimental, useful, and still small enough to learn fast."
         , body =
             column
                 [ width (fill |> maximum 760)
